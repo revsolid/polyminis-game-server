@@ -24,7 +24,7 @@ void Server::onProcessTerminate()
 
 bool Server::onHealthCheck()
 {
-  bool health;
+  bool health = true;
   // complete health evaluation within 60 seconds and set health
   return health;
 }
