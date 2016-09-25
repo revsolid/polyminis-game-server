@@ -3,12 +3,13 @@
 
 #include <string>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
 class ProcessHandle
 {
 public:
-  static ProcessHandle SpawnProcess(std::string path);
+  static ProcessHandle SpawnProcess(const std::string& path);
   static ProcessHandle INVALID;
 
   int WaitForExit();

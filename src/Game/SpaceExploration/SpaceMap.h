@@ -8,7 +8,7 @@
 struct SMSector
 {
   int mId;
-}
+};
 
 // Spacemap keeps track of a player as it moves in space
 class SpaceMap

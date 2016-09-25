@@ -50,9 +50,7 @@ void Server::Start()
 
 int main()
 {
+
   Server server;
   server.Start();
-
-  auto ph = ProcessHandle::SpawnProcess("cat Main.cpp");
-  ph.WaitForExit();
 }

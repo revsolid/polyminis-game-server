@@ -1,15 +1,17 @@
 #include "OS.h"
 
-ProcessHandle ProcessHandle::INVALID == ProcessHandle(-1);
+ProcessHandle ProcessHandle::INVALID = ProcessHandle(-1);
 
-ProcessHandle(){}
+ProcessHandle::ProcessHandle(){}
 
-ProcessHandle(pid_t pid)
+ProcessHandle::ProcessHandle(pid_t pid)
 {
   mPid = pid;
 
   // TODO: If pid == -1, mark myself as invalid (?)
 }
+
+ProcessHandle::~ProcessHandle(){}
 
 ProcessHandle ProcessHandle::SpawnProcess(const std::string& programPath)
 {
@@ -26,7 +28,6 @@ ProcessHandle ProcessHandle::SpawnProcess(const std::string& programPath)
             exit(1);
 
         default: /* Parent process */
-            std::cout << "Process created with pid " << pid << "\n";
             return ProcessHandle(pid);
     }
 }
@@ -36,7 +37,7 @@ int ProcessHandle::WaitForExit()
     int status;
     while (!WIFEXITED(status))
     {
-        waitpid(mPid, status, 0); /* Wait for the process to complete */
+        waitpid(mPid, &status, 0); /* Wait for the process to complete */
     }
     mExitStatus = status;
     return status;
