@@ -3,6 +3,7 @@
 
 #include "Core/Types.h"
 
+#include <vector>
 
 // Star Map Sector
 struct SMSector
@@ -10,12 +11,17 @@ struct SMSector
   int mId;
 };
 
+struct SpaceMap
+{
+  std::vector<SMSector> sectors;
+};
+
 // Spacemap keeps track of a player as it moves in space
-class SpaceMap
+class SpaceMapSession
 {
 public:
-  SpaceMap(){}
-  ~SpaceMap(){}
+  SpaceMapSession(){}
+  ~SpaceMapSession(){}
 
 
   //TODO: This are def. not void
