@@ -1,4 +1,7 @@
 #include "Main.h"
+#include "Core/OS.h"
+#include "Core/Types.h"
+#include "Game/SpaceExploration/SpaceMap.h"
 
 class Server
 {
@@ -32,7 +35,8 @@ bool Server::onHealthCheck()
 void Server::Start()
 {
 // Set parameters and call ProcessReady
-   std::string serverLog("serverOut.log");        //Example of a log file
+// Example of a log file
+   std::string serverLog("serverOut.log");
    std::vector<std::string> logPaths;
    logPaths.push_back(serverLog);
    Aws::GameLift::Server::InitSDK();
@@ -46,6 +50,7 @@ void Server::Start()
 
 int main()
 {
+
   Server server;
   server.Start();
 }
