@@ -1,3 +1,2 @@
-#include <aws/gamelift/server/GameLiftServerAPI.h>
-#include <aws/gamelift/server/ProcessParameters.h>
-#include <aws/gamelift/server/LogParameters.h>
+#include <websocketpp/config/asio_no_tls.hpp>
+#include <websocketpp/server.hpp>
