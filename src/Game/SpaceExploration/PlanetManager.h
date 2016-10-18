@@ -1,6 +1,6 @@
 #pragma once
 #include "Planet.h"
-#include "Core\Types.h"
+#include "Core/Types.h"
 #include <vector>
 #include <string>
 

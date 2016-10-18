@@ -2,7 +2,7 @@
 
 #include <iostream>
 #include "Main.h"
-#include "Core\Tools.h"
+#include "Core/Tools.h"
 #include "Game/SpaceExploration/PlanetManager.h"
 #include "Game/SpaceExploration/SpaceMap.h"
 //#include "Core/OS.h"
