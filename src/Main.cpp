@@ -162,6 +162,8 @@ int main()
 
 		// Start the ASIO io_service run loop
 		game_server.run();
+
+		std::cout << "Server running..." << std::endl;
 	}
 	catch (websocketpp::exception const & e) 
 	{
