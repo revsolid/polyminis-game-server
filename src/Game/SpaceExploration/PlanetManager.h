@@ -1,5 +1,6 @@
 #pragma once
 #include "Planet.h"
+#include "Core\Types.h"
 #include <vector>
 #include <string>
 
@@ -10,20 +11,12 @@ public:
 
 	void AddPlanet(Planet inPlanet);
 	void AddPlanet(float x, float y, unsigned int id);
-
-
-	// Update visibility status of each planet, 
-	// and push changed ones to spawn or despawn list.
-	void UpdatePlanetsVisibility(float x, float y, float distance);
 	
-	// return a message string for Spawning/Despawning		
-	// in the form of <despawn>[3,5,17]
-	std::vector<std::string> SpawnStrings();
-	std::string DespawnString();
+	// return a vector for each planet visible 
+	// from a point
+	std::vector<std::string> SpawnVisibleStrings(Coord inCoord, float distance);
 
 private:
 	std::vector<Planet> mPlanets;
-	std::vector<Planet*> mToSpawn;
-	std::vector<Planet*> mToDespawn;
 };
 

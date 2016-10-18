@@ -1,14 +1,13 @@
 #include "Planet.h"
 
 Planet::Planet(float x, float y, int inID):
-	mID(inID),
-	mIsVisible(false)
+	mID(inID)
 {
 	mPosition.x = x;
 	mPosition.y = y;
 }
 
-Vector2 Planet::GetPos()
+Coord Planet::GetPos()
 {
 	return mPosition;
 }
@@ -18,20 +17,14 @@ int Planet::GetID()
 	return mID;
 }
 
-
-void Planet::UpdateVisibility(float inX, float inY, float visibleDistance)
+bool Planet::IsVisible(Coord viewPoint, float visibleDistance)
 {
-	if (sqrt(pow(mPosition.x - inX, 2) + pow(mPosition.y - inY, 2)) < visibleDistance)
+	if (sqrt(pow(mPosition.x - viewPoint.x, 2) + pow(mPosition.y - viewPoint.y, 2)) < visibleDistance)
 	{
-		mIsVisible = true;
+		return true;
 	}
 	else
 	{
-		mIsVisible = false;
+		return false;
 	}
-}
-
-bool Planet::IsVisible()
-{
-	return mIsVisible;
 }

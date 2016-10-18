@@ -2,7 +2,9 @@
 
 #include <iostream>
 #include "Main.h"
+#include "Core\Tools.h"
 #include "Game/SpaceExploration/PlanetManager.h"
+#include "Game/SpaceExploration/SpaceMap.h"
 //#include "Core/OS.h"
 //#include "Core/Types.h"
 //#include "Game/SpaceExploration/SpaceMap.h"
@@ -22,10 +24,35 @@ typedef server::message_ptr message_ptr;
 
 
 PlanetManager* pManager;
+SpaceMapSession* ship;
 float visibilityRange = 3.0f;
 
-float playerPosX = 0;
-float playerPosY = 0;
+// send messageContent to client
+void SendOutMessage(server* s, websocketpp::connection_hdl hdl, message_ptr msgptr, std::string messageContent)
+{
+	try
+	{
+		s->send(hdl, messageContent, msgptr->get_opcode());
+	}
+	catch (const websocketpp::lib::error_code& e)
+	{
+		std::cout << "Send Message Failed: " << e << "(" << e.message() << ")" << std::endl;
+	}
+}
+
+// take location of ship variable and 
+// send all the planets visible from there.
+void SendPlanetsData(server* s, websocketpp::connection_hdl hdl, message_ptr msg)
+{
+	std::vector<std::string> spawnMsgs = pManager->SpawnVisibleStrings(ship->GetPos(), visibilityRange);
+	if (!spawnMsgs.empty())
+	{
+		for (auto i : spawnMsgs)
+		{
+			SendOutMessage(s, hdl, msg, i);
+		}
+	}
+}
 
 // Define a callback to handle incoming messages
 void on_message(server* s, websocketpp::connection_hdl hdl, message_ptr msg) {
@@ -43,32 +70,28 @@ void on_message(server* s, websocketpp::connection_hdl hdl, message_ptr msg) {
 		s->stop_listening();
 		return;
 	}
-	else if (messageType == "loc") // Location update, send planet to spawn and despawn
+	else if (messageType == "mov") // attempt movement
 	{
-		std::string xString = messageLoad.substr(0, messageLoad.find(",") - 1);
-		std::string yString = messageLoad.substr(messageLoad.find(",") + 1, messageLoad.length() - xString.length() - 1);
-		playerPosX = atof(xString.c_str());
-		playerPosY = atof(yString.c_str());
-		std::cout << playerPosX << ": " << playerPosY << std::endl;
-		pManager->UpdatePlanetsVisibility(playerPosX, playerPosY, visibilityRange);
-		std::vector<std::string> spawnMsgs = pManager->SpawnStrings();
-
-		if (!spawnMsgs.empty())
+		Coord newCoord = Tools::Parse2DCoord(messageLoad);
+		bool approved = ship->AttemptMove(newCoord);
+		if (!approved)
 		{
-			for (auto i : spawnMsgs)
-			{
-				try
-				{
-					s->send(hdl, i, msg->get_opcode());
-					std::cout << "Spawn message:" << i << std::endl;
-				}
-				catch (const websocketpp::lib::error_code& e)
-				{
-					std::cout << "SpawningMsg Failed: " << e << "(" << e.message() << ")" << std::endl;
-				}
-			}
+			std::string denyStr = "<kickback>[";
+			denyStr += std::to_string(ship->GetPos().x);
+			denyStr += ",";
+			denyStr += std::to_string(ship->GetPos().y);
+			denyStr += "]";
+
+			SendOutMessage(s, hdl, msg, denyStr);
 		}
-	}	
+		SendPlanetsData(s, hdl, msg);
+	}
+	else if (messageType == "init")
+	{
+		ship = new SpaceMapSession(Tools::Parse2DCoord(messageLoad));
+
+		SendPlanetsData(s, hdl, msg);
+	}
 }
 
 void InitPlanets()
@@ -116,64 +139,40 @@ void InitPlanets()
 		{ -3.0f, -5.0f },
 		{ -5.0f, -5.0f }
 	});
-
-	pManager->UpdatePlanetsVisibility(playerPosX, playerPosY, visibilityRange);
-}
-
-// check if any planets need to spawn or despawn,
-// and send the spawn/despawn massages
-void UpdatePlanets()
-{
-	pManager->UpdatePlanetsVisibility(playerPosX, playerPosY, visibilityRange);
-	
-}
-
-void UpdatePlayerPos(float x, float y)
-{
-	playerPosX = x;
-	playerPosY = y;
 }
 
 
-int main() 
-{
-
+int main() {
 	// Create a server endpoint
-	server game_server;
+	server echo_server;
 	InitPlanets();
 
-	try 
-	{
+	try {
+
 		// Set logging settings
-		game_server.set_access_channels(websocketpp::log::alevel::all);
-		game_server.clear_access_channels(websocketpp::log::alevel::frame_payload);
+		echo_server.set_access_channels(websocketpp::log::alevel::all);
+		echo_server.clear_access_channels(websocketpp::log::alevel::frame_payload);
 
 		// Initialize Asio
-		game_server.init_asio();
+		echo_server.init_asio();
 
 		// Register our message handler
-		game_server.set_message_handler(bind(&on_message, &game_server, ::_1, ::_2));
+		echo_server.set_message_handler(bind(&on_message, &echo_server, ::_1, ::_2));
 
 		// Listen on port 9002
-		game_server.listen(9002);
+		echo_server.listen(8080);
 
 		// Start the server accept loop
-		game_server.start_accept();
+		echo_server.start_accept();
 
 		// Start the ASIO io_service run loop
-		game_server.run();
-
-		std::cout << "Server running..." << std::endl;
+		echo_server.run();
 	}
-	catch (websocketpp::exception const & e) 
-	{
+	catch (websocketpp::exception const & e) {
 		std::cout << e.what() << std::endl;
 	}
-	catch (...) 
-	{
+	catch (...) {
 		std::cout << "other exception" << std::endl;
 	}
-
-
 
 }
