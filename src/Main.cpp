@@ -25,7 +25,7 @@ typedef server::message_ptr message_ptr;
 
 PlanetManager* pManager;
 SpaceMapSession* ship;
-float visibilityRange = 3.0f;
+float visibilityRange = 600.0f;
 
 // send messageContent to client
 void SendOutMessage(server* s, websocketpp::connection_hdl hdl, message_ptr msgptr, std::string messageContent)
@@ -55,7 +55,8 @@ void SendPlanetsData(server* s, websocketpp::connection_hdl hdl, message_ptr msg
 }
 
 // Define a callback to handle incoming messages
-void on_message(server* s, websocketpp::connection_hdl hdl, message_ptr msg) {
+void on_message(server* s, websocketpp::connection_hdl hdl, message_ptr msg) 
+{
 	//std::cout << "on_message called with hdl: " << hdl.lock().get() << " and message: " << msg->get_payload() << std::endl;
 
 	std::string message = msg->get_payload();
@@ -66,12 +67,14 @@ void on_message(server* s, websocketpp::connection_hdl hdl, message_ptr msg) {
 	
 	// check for a special command to instruct the server to stop listening so
 	// it can be cleanly exited.
-	if (msg->get_payload() == "stop-listening") {
+	if (msg->get_payload() == "stop-listening") 
+	{
 		s->stop_listening();
 		return;
 	}
 	else if (messageType == "mov") // attempt movement
 	{
+
 		Coord newCoord = Tools::Parse2DCoord(messageLoad);
 		bool approved = ship->AttemptMove(newCoord);
 		if (!approved)
@@ -97,82 +100,87 @@ void on_message(server* s, websocketpp::connection_hdl hdl, message_ptr msg) {
 void InitPlanets()
 {
 	pManager = new PlanetManager({
-		{ 1.0f, 1.0f },
-		{ 3.0f, 1.0f },
-		{ 5.0f, 1.0f },
-		{ -1.0f, 1.0f },
-		{ -3.0f, 1.0f },
-		{ -5.0f, 1.0f },
+		{ 10.0f, 10.0f },
+		{ 30.0f, 10.0f },
+		{ 50.0f, 10.0f },
+		{ -10.0f, 10.0f },
+		{ -30.0f, 10.0f },
+		{ -50.0f, 10.0f },
 
-		{ 1.0f, 3.0f },
-		{ 3.0f, 3.0f },
-		{ 5.0f, 3.0f },
-		{ -1.0f, 3.0f },
-		{ -3.0f, 3.0f },
-		{ -5.0f, 3.0f },
+		{ 10.0f, 30.0f },
+		{ 30.0f, 30.0f },
+		{ 50.0f, 30.0f },
+		{ -10.0f, 30.0f },
+		{ -30.0f, 30.0f },
+		{ -50.0f, 30.0f },
 
-		{ 1.0f, 5.0f },
-		{ 3.0f, 5.0f },
-		{ 5.0f, 5.0f },
-		{ -1.0f, 5.0f },
-		{ -3.0f, 5.0f },
-		{ -5.0f, 5.0f },
+		{ 10.0f, 50.0f },
+		{ 30.0f, 50.0f },
+		{ 50.0f, 50.0f },
+		{ -10.0f, 50.0f },
+		{ -30.0f, 50.0f },
+		{ -50.0f, 50.0f }
+		/*
+		{ 100.0f, -100.0f },
+		{ 300.0f, -100.0f },
+		{ 500.0f, -100.0f },
+		{ -100.0f, -100.0f },
+		{ -300.0f, -100.0f },
+		{ -500.0f, -100.0f },
 
-		{ 1.0f, -1.0f },
-		{ 3.0f, -1.0f },
-		{ 5.0f, -1.0f },
-		{ -1.0f, -1.0f },
-		{ -3.0f, -1.0f },
-		{ -5.0f, -1.0f },
+		{ 100.0f, -300.0f },
+		{ 300.0f, -300.0f },
+		{ 500.0f, -300.0f },
+		{ -100.0f, -300.0f },
+		{ -300.0f, -300.0f },
+		{ -500.0f, -300.0f },
 
-		{ 1.0f, -3.0f },
-		{ 3.0f, -3.0f },
-		{ 5.0f, -3.0f },
-		{ -1.0f, -3.0f },
-		{ -3.0f, -3.0f },
-		{ -5.0f, -3.0f },
-
-		{ 1.0f, -5.0f },
-		{ 3.0f, -5.0f },
-		{ 5.0f, -5.0f },
-		{ -1.0f, -5.0f },
-		{ -3.0f, -5.0f },
-		{ -5.0f, -5.0f }
+		{ 100.0f, -500.0f },
+		{ 300.0f, -500.0f },
+		{ 500.0f, -500.0f },
+		{ -100.0f, -500.0f },
+		{ -300.0f, -500.0f },
+		{ -500.0f, -500.0f }
+		*/
 	});
 }
 
 
-int main() {
+int main()
+{
 	// Create a server endpoint
-	server echo_server;
+	server gameServer;
 	InitPlanets();
 
-	try {
+	try 
+	{
 
 		// Set logging settings
-		echo_server.set_access_channels(websocketpp::log::alevel::all);
-		echo_server.clear_access_channels(websocketpp::log::alevel::frame_payload);
+		gameServer.set_access_channels(websocketpp::log::alevel::all);
+		gameServer.clear_access_channels(websocketpp::log::alevel::frame_payload);
 
 		// Initialize Asio
-		echo_server.init_asio();
+		gameServer.init_asio();
 
 		// Register our message handler
-		echo_server.set_message_handler(bind(&on_message, &echo_server, ::_1, ::_2));
+		gameServer.set_message_handler(bind(&on_message, &gameServer, ::_1, ::_2));
 
 		// Listen on port 9002
-		echo_server.listen(8080);
+		gameServer.listen(8080);
 
 		// Start the server accept loop
-		echo_server.start_accept();
+		gameServer.start_accept();
 
 		// Start the ASIO io_service run loop
-		echo_server.run();
+		gameServer.run();
 	}
-	catch (websocketpp::exception const & e) {
+	catch (websocketpp::exception const & e) 
+	{
 		std::cout << e.what() << std::endl;
 	}
-	catch (...) {
-		std::cout << "other exception" << std::endl;
+	catch (const std::exception  & e)
+	{
+		std::cout << "Exception: " << e.what() << std::endl;
 	}
 
 }

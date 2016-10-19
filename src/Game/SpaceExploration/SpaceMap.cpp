@@ -6,10 +6,9 @@ Coord SpaceMapSession::GetPos()
 }
 
 
-SpaceMapSession::SpaceMapSession(Coord inCoord) 
+SpaceMapSession::SpaceMapSession(Coord inCoord) :
+	mPosition(inCoord)
 {
-	mPosition = inCoord;
-
 	//TODO: assign different ID to players
 	mPlayerId = 42;
 }
