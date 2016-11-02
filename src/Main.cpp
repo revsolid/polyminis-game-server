@@ -1,28 +1,16 @@
 #pragma warning(disable:4996)
 
 #include <iostream>
+#include <picojson.h>
 #include "Main.h"
 #include "Core/Tools.h"
+#include "Core/Server.h"
+#include "Game/SpaceExploration/SpaceExplorationService.h"
 #include "Game/SpaceExploration/PlanetManager.h"
 #include "Game/SpaceExploration/SpaceMap.h"
-#include "picojson.h"
-//#include "Core/OS.h"
-//#include "Core/Types.h"
 
 
-
-typedef websocketpp::server<websocketpp::config::asio> server;
-
-
-using websocketpp::lib::placeholders::_1;
-using websocketpp::lib::placeholders::_2;
-
-using websocketpp::lib::bind;
-
-// pull out the type of messages sent by our config
-typedef server::message_ptr message_ptr;
-
-
+/*
 PlanetManager* pManager;
 SpaceMapSession* ship;
 float visibilityRange = 600.0f;
@@ -96,10 +84,11 @@ void on_message(server* s, websocketpp::connection_hdl hdl, message_ptr msg)
         SendPlanetsData(s, hdl, msg);
     }
 }
+ */
 
 void InitPlanets()
 {
-    pManager = new PlanetManager({
+    auto pManager = new PlanetManager({
         { 10.0f, 10.0f },
         { 30.0f, 10.0f },
         { 50.0f, 10.0f },
@@ -148,34 +137,22 @@ void InitPlanets()
 
 int main()
 {
-    // Create a server endpoint
-    server gameServer;
-    InitPlanets();
-
     try 
     {
-        std::string json = "[ \"hello JSON\" ]";
-        picojson::value v;
-        std::string err = picojson::parse(v, json);
+        PolyminisServer::WSServer server;
 
-        // Set logging settings
-        gameServer.set_access_channels(websocketpp::log::alevel::all);
-        gameServer.clear_access_channels(websocketpp::log::alevel::frame_payload);
+        PlanetManager pManager({});
 
-        // Initialize Asio
-        gameServer.init_asio();
-
-        // Register our message handler
-        gameServer.set_message_handler(bind(&on_message, &gameServer, ::_1, ::_2));
-
-        // Listen on port 9002
-        gameServer.listen(8080);
-
-        // Start the server accept loop
-        gameServer.start_accept();
-
-        // Start the ASIO io_service run loop
-        gameServer.run();
+        unsigned int id = 0;
+        for(float i = -500.0f; i <= 500.0f; i += 200)
+        {
+            for(float j = -500.0f; j <= 500.0f; j += 200)
+            {
+                pManager.AddPlanet(i, j, i++);
+            }
+        }
+        SpaceExplorationService spaceEx(server, pManager);
+        server.RunServer();
     }
     catch (websocketpp::exception const & e) 
     {

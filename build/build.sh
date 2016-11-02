@@ -1,5 +1,8 @@
 #!/bin/sh
-mkdir -p ../binTmp
+
+export CC=/usr/bin/clang
+export CXX=/usr/bin/clang++
+mkdi r-p ../binTmp
 cd ../binTmp
 cmake ../src && make
 

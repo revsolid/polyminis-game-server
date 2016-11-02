@@ -20,17 +20,17 @@ struct SpaceMap
 class SpaceMapSession
 {
 public:
-	explicit SpaceMapSession(Coord inCoord);
+    explicit SpaceMapSession(Coord inCoord);
     ~SpaceMapSession(){}
 
-	bool AttemptMove(Coord inCoord);
-	void AttemptTeleport() {};
+    bool AttemptMove(Coord inCoord);
+    void AttemptTeleport() {};
 
-	Coord GetPos();
+    Coord GetPos();
 
 private:
-	int   mPlayerId;
-	Coord mPosition;
+    int   mPlayerId;
+    Coord mPosition;
 };
 
 #endif
