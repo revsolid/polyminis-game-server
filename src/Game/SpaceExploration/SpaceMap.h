@@ -21,16 +21,18 @@ class SpaceMapSession
 {
 public:
     explicit SpaceMapSession(Coord inCoord);
+    SpaceMapSession() {}
     ~SpaceMapSession(){}
 
     bool AttemptMove(Coord inCoord);
     void AttemptTeleport() {};
 
     Coord GetPos();
+    float GetVisibilityRange() { return 600.0f; } //TODO: Where does this come from?
 
 private:
-    int   mPlayerId;
-    Coord mPosition;
+    int   mPlayerId { -1 };
+    Coord mPosition { 0.0f, 0.0f };
 };
 
 #endif

@@ -3,13 +3,20 @@
 #include "PlanetManager.h"
 #include "SpaceMap.h"
 
-class SpaceExplorationService
+namespace SpaceExploration
 {
-public:
-    SpaceExplorationService(PolyminisServer::WSServer& server,
-                            PlanetManager& pManager);
-    std::string SpaceExplorationEndpoint(picojson::value& command);
-private:
-    PlanetManager& mPlanetManager;
-    SpaceMapSession* mSpaceMapSession; 
-};
+    class SpaceExplorationService
+    {
+    public:
+        SpaceExplorationService(PolyminisServer::WSServer& server,
+                                PlanetManager& pManager);
+        picojson::object SpaceExplorationEndpoint(picojson::value& command);
+    private:
+        picojson::object CreatePlanetaryPayload();
+
+        // Members
+        PlanetManager& mPlanetManager;
+        SpaceMapSession mSpaceMapSession; 
+    };
+}
+
