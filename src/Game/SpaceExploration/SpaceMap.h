@@ -20,17 +20,19 @@ struct SpaceMap
 class SpaceMapSession
 {
 public:
-  SpaceMapSession(){}
-  ~SpaceMapSession(){}
+    explicit SpaceMapSession(Coord inCoord);
+    SpaceMapSession() {}
+    ~SpaceMapSession(){}
 
+    bool AttemptMove(Coord inCoord);
+    void AttemptTeleport() {};
 
-  //TODO: This are def. not void
-  void AttemptMove(Coord coord) {}
-  void AttemptTeleport(){}
+    Coord GetPos();
+    float GetVisibilityRange() { return 600.0f; } //TODO: Where does this come from?
 
 private:
-  int   mPlayerId;
-  Coord mLocation;
+    int   mPlayerId { -1 };
+    Coord mPosition { 0.0f, 0.0f };
 };
 
 #endif

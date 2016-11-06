@@ -2,11 +2,13 @@ CMAKE_MINIMUM_REQUIRED (VERSION 2.6)
 
 PROJECT (Polyminis)
 
-SET(M_COMPILE_FLAGS "-std=c++11")
+SET(M_COMPILE_FLAGS "-std=c++11 -g")
 SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${M_COMPILE_FLAGS}")
 
 INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}")
 INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/../thirdparty/gamelift/include")
+INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/../thirdparty/websocketpp")
+INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/../thirdparty/picojson")
 LINK_DIRECTORIES("${PROJECT_SOURCE_DIR}/../thirdparty/gamelift/lib/amazon_linux_x64")
 LINK_DIRECTORIES("${PROJECT_SOURCE_DIR}/../thirdparty/dependencies/sio_libs")
 LINK_DIRECTORIES("${PROJECT_SOURCE_DIR}/../thirdparty/dependencies/boost_libs")
