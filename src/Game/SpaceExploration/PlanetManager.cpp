@@ -10,7 +10,33 @@ PlanetManager::PlanetManager(const std::initializer_list<std::pair<float, float>
         mPlanets.push_back(Planet(i.first, i.second, id));
         ++id;
     }
+}    
+
+Planet* PlanetManager::GetPlanet(unsigned int inId) const
+{
+    for (auto p : mPlanets)
+    {
+        if (p.GetID() == inId)
+        {
+            return &p;
+        }
+    }
+    return nullptr;
 }
+
+Planet* PlanetManager::GetPlanet(Coord point) const
+{
+    float threshold = 0.1f;
+    for (auto p : mPlanets)
+    {
+        if (Coord::Distance(p.GetPos(), point) < threshold)
+        {
+            return &p;
+        }
+    }
+    return nullptr;
+}
+
 
 void PlanetManager::AddPlanet(Planet inPlanet)
 {

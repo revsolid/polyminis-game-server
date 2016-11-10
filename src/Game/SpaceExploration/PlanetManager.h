@@ -12,7 +12,10 @@ public:
 
     void AddPlanet(Planet inPlanet);
     void AddPlanet(float x, float y, unsigned int id);
-    
+
+	Planet* GetPlanet(unsigned int inId) const;
+	Planet* GetPlanet(Coord point) const; // if there is a planet close to point
+
     // return a vector for each planet visible 
     // from a point
     picojson::array GetVisiblePlanets(Coord inCoord, float distance);

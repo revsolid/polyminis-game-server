@@ -1,5 +1,3 @@
-#pragma warning(disable:4996)
-
 #include <iostream>
 #include <picojson.h>
 #include "Main.h"
@@ -17,7 +15,7 @@ int main()
 
         PlanetManager pManager({});
 
-        unsigned int id = 0;
+        int id = 0;
         for(float i = -500.0f; i <= 500.0f; i += 200)
         {
             for(float j = -500.0f; j <= 500.0f; j += 200)

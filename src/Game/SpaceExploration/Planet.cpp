@@ -1,30 +1,30 @@
 #include "Planet.h"
 
 Planet::Planet(float x, float y, int inID):
-	mID(inID)
+    mID(inID)
 {
-	mPosition.x = x;
-	mPosition.y = y;
+    mPosition.x = x;
+    mPosition.y = y;
 }
 
-Coord Planet::GetPos()
+Coord Planet::GetPos() const
 {
-	return mPosition;
+    return mPosition;
 }
 
-int Planet::GetID()
+int Planet::GetID() const
 {
-	return mID;
+    return mID;
 }
 
 bool Planet::IsVisible(Coord viewPoint, float visibleDistance)
 {
-	if (sqrt(pow(mPosition.x - viewPoint.x, 2) + pow(mPosition.y - viewPoint.y, 2)) < visibleDistance)
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
+    if (Coord::Distance(viewPoint, mPosition) < visibleDistance)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }

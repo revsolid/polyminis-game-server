@@ -1,5 +1,4 @@
 #pragma once
-#include <math.h>
 #include "Core/Types.h"
 
 //Individual planet data for planets in exploration
@@ -8,8 +7,8 @@ class Planet
 {
 public:
     explicit Planet(float x, float y, int inID);
-    Coord GetPos();
-    int GetID();
+    Coord GetPos() const;
+    int GetID() const;
 
     // Pass in a position and check if it's visible. Right now it just calculates 
     // euclidean distance but later we can do optimization
