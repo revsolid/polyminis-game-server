@@ -31,7 +31,7 @@ std::shared_ptr<Planet> PlanetManager::GetPlanet(Coord point) const
     {
         if (Coord::Distance(p.GetPos(), point) < threshold)
         {
-			return std::make_shared<Planet>(p);
+            return std::make_shared<Planet>(p);
 		}
     }
     return nullptr;

@@ -71,7 +71,7 @@ namespace PolyminisServer
             // Got unrecognized command
         }
 
-    return std::move(picojson::object());
+        return std::move(picojson::object());
     }
 
     void WSServer::AddService(std::shared_ptr<WSService> service)

@@ -24,7 +24,7 @@ bool SpaceMapSession::AttemptMove(Coord inCoord)
 
 bool SpaceMapSession::AttemptWarp(const PlanetManager& pManager, Coord point)
 {
-	std::shared_ptr<Planet> dest = pManager.GetPlanet(point);
+    std::shared_ptr<Planet> dest = pManager.GetPlanet(point);
 
     // TODO: shouldn't be able to warp all the time
     if (dest != nullptr)
