@@ -13,6 +13,7 @@ namespace SpaceExploration
         picojson::object SpaceExplorationEndpoint(picojson::value& command);
     private:
         picojson::object CreatePlanetaryPayload();
+        picojson::object CreateWarpPayload(Coord dest);
 
         // Members
         PlanetManager& mPlanetManager;

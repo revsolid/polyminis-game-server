@@ -71,7 +71,7 @@ namespace PolyminisServer
             // Got unrecognized command
         }
 
-	return std::move(picojson::object());
+    return std::move(picojson::object());
     }
 
     void WSServer::AddService(std::shared_ptr<WSService> service)
@@ -90,7 +90,7 @@ namespace PolyminisServer
              auto message_str = message.serialize();
              mServer.send(hdl, message_str, msgptr->get_opcode());
         }
-    	catch (const websocketpp::lib::error_code& e)
+        catch (const websocketpp::lib::error_code& e)
         {
             std::cout << "Send Message Failed: " << e << "(" << e.message() << ")" << std::endl;
         }

@@ -9,7 +9,7 @@ namespace PolyminisServer
 {
     namespace JsonHelpers
     {
-	std::string json_get_string(picojson::value& v, const std::string& fieldname);
+        std::string json_get_string(picojson::value& v, const std::string& fieldname);
         float json_get_float(picojson::value& v, const std::string& fieldname);
 
         const picojson::object& json_get_object(picojson::value& v, const std::string& fieldname);

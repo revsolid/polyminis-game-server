@@ -2,6 +2,7 @@
 #define __SPACE_MAP
 
 #include "Core/Types.h"
+#include "PlanetManager.h"
 
 #include <vector>
 
@@ -25,7 +26,7 @@ public:
     ~SpaceMapSession(){}
 
     bool AttemptMove(Coord inCoord);
-    void AttemptTeleport() {};
+    bool AttemptWarp(const PlanetManager& pManager, Coord point);
 
     Coord GetPos();
     float GetVisibilityRange() { return 600.0f; } //TODO: Where does this come from?

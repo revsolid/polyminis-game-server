@@ -19,14 +19,14 @@ namespace SpaceExploration
     {
         std::string command = PolyminisServer::JsonHelpers::json_get_string(request, "Command");
         auto payload = PolyminisServer::JsonHelpers::json_get_object(request, "Payload");
+
         if (payload.count("Position") == 0)
         {
             return PolyminisServer::JsonHelpers::json_create_error("Error - Position not sent");
         }
         auto position_json = payload["Position"];
         float x = PolyminisServer::JsonHelpers::json_get_float(position_json, "x");
-        float y = PolyminisServer::JsonHelpers::json_get_float(position_json, "y");
-       
+        float y = PolyminisServer::JsonHelpers::json_get_float(position_json, "y");   
     
         picojson::object to_ret;
         if (command == "INIT")
@@ -44,6 +44,16 @@ namespace SpaceExploration
             else
             {
                 to_ret = CreatePlanetaryPayload();
+            }
+        }
+        else if (command == "WARP")
+        {
+            Coord destPoint;
+            destPoint.x = x;
+            destPoint.y = y;
+            if (mSpaceMapSession.AttemptWarp(mPlanetManager, destPoint))
+            {
+                to_ret = CreateWarpPayload(destPoint);
             }
         }
         else
@@ -68,4 +78,19 @@ namespace SpaceExploration
         }
         return std::move(picojson::object());
     }
+
+    picojson::object SpaceExplorationService::CreateWarpPayload(Coord dest)
+    {
+        std::cout << "Creating Warp Payload " << std::endl;
+        picojson::object warpToPlanetEvent;
+        warpToPlanetEvent["Service"] = picojson::value("space_exploration");
+        warpToPlanetEvent["EventString"] = picojson::value("WARP");
+
+        picojson::object position_json;
+        position_json["x"] = picojson::value(dest.x);
+        position_json["y"] = picojson::value(dest.y);
+        warpToPlanetEvent["Position"] = picojson::value(position_json);
+        return warpToPlanetEvent;
+    }
+
 }
