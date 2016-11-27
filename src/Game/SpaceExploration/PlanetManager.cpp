@@ -12,27 +12,27 @@ PlanetManager::PlanetManager(const std::initializer_list<std::pair<float, float>
     }
 }    
 
-Planet* PlanetManager::GetPlanet(unsigned int inId) const
+std::shared_ptr<Planet> PlanetManager::GetPlanet(unsigned int inId) const
 {
     for (auto p : mPlanets)
     {
         if (p.GetID() == inId)
         {
-            return &p;
+            return std::make_shared<Planet>(p);
         }
     }
     return nullptr;
 }
 
-Planet* PlanetManager::GetPlanet(Coord point) const
+std::shared_ptr<Planet> PlanetManager::GetPlanet(Coord point) const
 {
     float threshold = 0.1f;
     for (auto p : mPlanets)
     {
         if (Coord::Distance(p.GetPos(), point) < threshold)
         {
-            return &p;
-        }
+			return std::make_shared<Planet>(p);
+		}
     }
     return nullptr;
 }
