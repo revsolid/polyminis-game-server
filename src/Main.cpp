@@ -6,6 +6,8 @@
 #include "Game/SpaceExploration/SpaceExplorationService.h"
 #include "Game/SpaceExploration/PlanetManager.h"
 #include "Game/SpaceExploration/SpaceMap.h"
+#include "Game/SpeciesDesigner/SpeciesDesignerService.h"
+
 
 int main()
 {
@@ -24,6 +26,7 @@ int main()
             }
         }
         SpaceExploration::SpaceExplorationService spaceEx(server, pManager);
+        SpeciesDesigner::SpeciesDesignerService speciesDs(server);
         server.RunServer();
     }
     catch (websocketpp::exception const & e) 
