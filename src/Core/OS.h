@@ -6,6 +6,14 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+
+#ifdef __APPLE__  
+  #define PROCESS_EXIT(exit_code) _exit(exit_code)
+#elif __linux
+  #define PROCESS_EXIT(exit_code) exit(exit_code)
+//TODO: Windows would be nice
+#endif
+
 class ProcessHandle
 {
 public:

@@ -27,11 +27,16 @@ namespace PolyminisServer
     typedef ws_server_t::message_ptr message_ptr;
      
     typedef std::function<picojson::object(picojson::value&)> ws_service_handler_t;
-    
+
     struct WSService
     {
       std::string mServiceName;
       ws_service_handler_t mHandler; 
+    };
+
+    struct SessionData
+    {
+        bool b;
     };
     
     class WSServer
@@ -53,16 +58,24 @@ namespace PolyminisServer
         }
       
         void RunServer();
+        void OnConnectionOpen(websocketpp::connection_hdl hdl);
+        void OnConnectionClose(websocketpp::connection_hdl hdl);
         void OnMessageReceived(websocketpp::connection_hdl hdl, message_ptr msg);
   
         void AddService(std::shared_ptr<WSService> service);
         void RemoveService(std::string serviceName);
 
-        picojson::object ControlEndpoint(picojson::value& request);
-
         void SendMessage(picojson::value& message, websocketpp::connection_hdl& hdl, message_ptr msgptr);
+
+        picojson::object ControlEndpoint(picojson::value& request);
     
     private:
+
+        // Members
+ 
+        // Data to keep per Session
+        std::unordered_map<websocketpp::connection_hdl, SessionData,
+                           std::owner_less<websocketpp::connection_hdl>> mConnections;
         ws_server_t mServer;
         std::unordered_map<std::string, std::shared_ptr<WSService>> mServices;
     };

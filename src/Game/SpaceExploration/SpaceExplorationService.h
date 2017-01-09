@@ -20,4 +20,3 @@ namespace SpaceExploration
         SpaceMapSession mSpaceMapSession; 
     };
 }
-

@@ -13,7 +13,19 @@ const picojson::object& HttpClient::Request(const std::string& host_, int port, 
         r.resolve(boost::asio::ip::tcp::resolver::query{host, "http"}));
 
     beast::http::request<beast::http::empty_body> req;
-    req.method = "GET";
+
+    switch(method)
+    {
+    case HttpMethod::POST:
+        req.method = "POST";
+        break;
+    case HttpMethod::GET:
+    // Fallthrough
+    default:
+        req.method = "GET";
+        break;
+    }
+
     req.url = "/";
     req.version = 11;
     beast::http::prepare(req);

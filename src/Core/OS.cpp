@@ -25,7 +25,7 @@ ProcessHandle ProcessHandle::SpawnProcess(const std::string& programPath)
         case 0: /* Child process */
             execl(programPath.c_str(), NULL); /* Execute the program */
 	    // TODO: excel doesn't return, if we get here something got eFFed.
-            exit(1);
+            PROCESS_EXIT(1);
 
         default: /* Parent process */
             return ProcessHandle(pid);

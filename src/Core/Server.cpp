@@ -19,7 +19,7 @@ namespace PolyminisServer
             // ERROR
             std::cout << "Error Parsing Message: " << message << std::endl;
         }
-    
+
         picojson::object response;
         auto it = mServices.find(JsonHelpers::json_get_string(v, "Service"));
         if (it != mServices.end())

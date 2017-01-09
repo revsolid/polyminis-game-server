@@ -1,11 +1,11 @@
 #include <iostream>
 #include <picojson.h>
 #include "Main.h"
-#include "Core/Tools.h"
 #include "Core/Server.h"
 #include "Game/SpaceExploration/SpaceExplorationService.h"
 #include "Game/SpaceExploration/PlanetManager.h"
 #include "Game/SpaceExploration/SpaceMap.h"
+#include "Game/CreatureObservation/CreatureObservationService.h"
 
 int main()
 {
@@ -24,6 +24,11 @@ int main()
             }
         }
         SpaceExploration::SpaceExplorationService spaceEx(server, pManager);
+
+        CreatureObservation::SimulationServerConfig simServerCfg { std::string("localhost"), 8080 };
+        CreatureObservation::CreatureObservationService creatureObs(server, simServerCfg);
+
+	std::cout << "Starting Server..." << std::endl;
         server.RunServer();
     }
     catch (websocketpp::exception const & e) 
