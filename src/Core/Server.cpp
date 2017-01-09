@@ -1,3 +1,4 @@
+#include "HttpClient.h"
 #include "Server.h"
 
 namespace PolyminisServer
@@ -11,9 +12,9 @@ namespace PolyminisServer
         std::string message = msg->get_payload();
     
         std::cout << "Message received: " << message << std::endl;
+
         picojson::value v;
         std::string err = picojson::parse(v, message);
-
         if (!err.empty())        
         {
             // ERROR
@@ -46,6 +47,7 @@ namespace PolyminisServer
         mServer.clear_access_channels(websocketpp::log::alevel::frame_payload);
         // Initialize Asio
         mServer.init_asio();
+
         // Register our message handler
         mServer.set_message_handler(bind(&WSServer::OnMessageReceived, this, _1, _2));
         // TODO: Port shouldn't be hardcoded

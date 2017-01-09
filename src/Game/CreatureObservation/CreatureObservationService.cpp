@@ -1,4 +1,5 @@
 #include "CreatureObservationService.h"
+#include "Core/HttpClient.h"
 
 namespace CreatureObservation
 {
@@ -6,6 +7,14 @@ namespace CreatureObservation
                                                            SimulationServerConfig& simulationServerCfg) :
                                                            mSimServerCfg(simulationServerCfg) 
     {
+	
+	picojson::object simServerStatus = PolyminisServer::HttpClient::Request(mSimServerCfg.host, mSimServerCfg.port,
+			                                                        "/simulations", PolyminisServer::HttpMethod::GET,
+					                                        picojson::object());
+
+	// TODO: Check the server status and if it isn't up, do something about it, error out (?)
+
+
         auto wss = std::make_shared<PolyminisServer::WSService>();
         wss->mServiceName = "space_exploration";
         wss->mHandler =  [=] (picojson::value& request)

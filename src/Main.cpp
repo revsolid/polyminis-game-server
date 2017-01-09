@@ -11,8 +11,8 @@ int main()
 {
     try 
     {
-        PolyminisServer::WSServer server;
 
+	PolyminisServer::WSServer server;
         PlanetManager pManager({});
 
         int id = 0;

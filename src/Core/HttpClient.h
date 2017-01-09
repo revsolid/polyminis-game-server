@@ -11,6 +11,7 @@ namespace PolyminisServer
     };
     struct HttpClient
     {
-        static const picojson::object& Request(const std::string& host, int port, HttpMethod method, const picojson::object& payload);
+        static picojson::object Request(const std::string& host, int port, const std::string& url,
+			                HttpMethod method, const picojson::object& payload);
     }; 
 }
