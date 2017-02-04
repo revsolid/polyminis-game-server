@@ -10,7 +10,7 @@ namespace PolyminisServer
     struct AlmanacServerCfg
     {
         
-    }
+    };
 
     typedef websocketpp::server<websocketpp::config::asio> ws_server_t;
     // pull out the type of messages sent by our config
