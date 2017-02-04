@@ -7,16 +7,26 @@ namespace CreatureObservation
                                                            SimulationServerConfig& simulationServerCfg) :
                                                            mSimServerCfg(simulationServerCfg) 
     {
-	
-	picojson::object simServerStatus = PolyminisServer::HttpClient::Request(mSimServerCfg.host, mSimServerCfg.port,
-			                                                        "/simulations", PolyminisServer::HttpMethod::GET,
-					                                        picojson::object());
+    
+        try
+        {
+            std::cout << "Requesting Simulation Server Status..." << std::endl;
+            picojson::object simServerStatus = PolyminisServer::HttpClient::Request(mSimServerCfg.host, mSimServerCfg.port,
+                                                                                    "/", PolyminisServer::HttpMethod::GET,
+                                                                                    picojson::object());
+            std::cout << "Done..." << std::endl;
+        }
+        catch (websocketpp::exception const & e) 
+        {
+            std::cout << e.what() << std::endl;
+        }
+        
 
-	// TODO: Check the server status and if it isn't up, do something about it, error out (?)
+        // TODO: Check the server status and if it isn't up, do something about it, error out (?)
 
 
         auto wss = std::make_shared<PolyminisServer::WSService>();
-        wss->mServiceName = "space_exploration";
+        wss->mServiceName = "creature_observation";
         wss->mHandler =  [=] (picojson::value& request)
                          {
                              return this->CreatureObservationEndpoint(request);
@@ -28,8 +38,8 @@ namespace CreatureObservation
     {
         picojson::object to_ret;
 
-	// Create a new simulation server for this session
-	
+    // Create a new simulation server for this session
+    
 
         // Change the Epoch of Simulation Server
 

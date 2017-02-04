@@ -11,8 +11,9 @@ int main()
 {
     try 
     {
-
-	PolyminisServer::WSServer server;
+        std::cout << "Creating Server..." << std::endl;
+        PolyminisServer::WSServer server;
+        std::cout << "Done.." << std::endl;
         PlanetManager pManager({});
 
         int id = 0;
@@ -23,12 +24,14 @@ int main()
                 pManager.AddPlanet(i, j, id++);
             }
         }
+        std::cout << "Adding Space Exploration..." << std::endl;
         SpaceExploration::SpaceExplorationService spaceEx(server, pManager);
 
         CreatureObservation::SimulationServerConfig simServerCfg { std::string("localhost"), 8080 };
+        std::cout << "Adding Creature Observation..." << std::endl;
         CreatureObservation::CreatureObservationService creatureObs(server, simServerCfg);
 
-	std::cout << "Starting Server..." << std::endl;
+        std::cout << "Starting Server..." << std::endl;
         server.RunServer();
     }
     catch (websocketpp::exception const & e) 

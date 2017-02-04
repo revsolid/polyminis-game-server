@@ -6,14 +6,24 @@
 
 using namespace PolyminisServer;
 picojson::object HttpClient::Request(const std::string& host, int port,
-    	                             const std::string& url, HttpMethod method,
-    		  		     const picojson::object& payload)
+                                     const std::string& url, HttpMethod method,
+                                     const picojson::object& payload)
 {
     boost::asio::io_service ios;
     boost::asio::ip::tcp::resolver r{ios};
     boost::asio::ip::tcp::socket sock{ios};
-    boost::asio::connect(sock,
-        r.resolve(boost::asio::ip::tcp::resolver::query{host, std::to_string(port)}));
+    std::cout << "HttpClient::Connecting to " << host << ":" << port << url << std::endl;
+    try
+    {
+        boost::asio::connect(sock,
+            r.resolve(boost::asio::ip::tcp::resolver::query{host, std::to_string(port)}));
+    }
+    catch (std::exception const & e) 
+    {
+        std::cout << e.what() << std::endl;
+        return std::move(picojson::object());
+    }
+    std::cout << "  Done.." << std::endl;
 
     beast::http::request<beast::http::empty_body> req;
 
@@ -45,11 +55,10 @@ picojson::object HttpClient::Request(const std::string& host, int port,
     if (!err.empty())        
     {
         // ERROR
-         std::cout << "Error Parsing Message: " << body << std::endl;
-	 return std::move(picojson::object());
+        std::cout << "Error Parsing Message: " << body << std::endl;
+        return std::move(picojson::object());
     }
     picojson::object obj;
     obj["response"] = std::move(v);
     return std::move(obj);
 }
-

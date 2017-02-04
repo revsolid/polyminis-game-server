@@ -1,4 +1,5 @@
 #include "SpaceExplorationService.h"
+#include "Core/JsonHelpers.h"
 
 namespace SpaceExploration
 {
@@ -17,16 +18,16 @@ namespace SpaceExploration
     
     picojson::object SpaceExplorationService::SpaceExplorationEndpoint(picojson::value& request)
     {
-        std::string command = PolyminisServer::JsonHelpers::json_get_string(request, "Command");
-        auto payload = PolyminisServer::JsonHelpers::json_get_object(request, "Payload");
+        std::string command = JsonHelpers::json_get_string(request, "Command");
+        auto payload = JsonHelpers::json_get_object(request, "Payload");
 
         if (payload.count("Position") == 0)
         {
-            return PolyminisServer::JsonHelpers::json_create_error("Error - Position not sent");
+            return JsonHelpers::json_create_error("Error - Position not sent");
         }
         auto position_json = payload["Position"];
-        float x = PolyminisServer::JsonHelpers::json_get_float(position_json, "x");
-        float y = PolyminisServer::JsonHelpers::json_get_float(position_json, "y");   
+        float x = JsonHelpers::json_get_float(position_json, "x");
+        float y = JsonHelpers::json_get_float(position_json, "y");   
     
         picojson::object to_ret;
         if (command == "INIT")
@@ -58,7 +59,7 @@ namespace SpaceExploration
         }
         else
         {
-            to_ret = PolyminisServer::JsonHelpers::json_create_error("Command Not Found");
+            to_ret = JsonHelpers::json_create_error("Command Not Found");
         }
         return std::move(to_ret);
     }

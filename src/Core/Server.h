@@ -7,21 +7,11 @@
 
 namespace PolyminisServer
 {
-    namespace JsonHelpers
+    struct AlmanacServerCfg
     {
-        std::string json_get_string(picojson::value& v, const std::string& fieldname);
-        float json_get_float(picojson::value& v, const std::string& fieldname);
-
-        const picojson::object& json_get_object(picojson::value& v, const std::string& fieldname);
-
-
-        // ERRORS
-        picojson::object json_create_error(const std::string& e_msg);
+        
     }
-}
 
-namespace PolyminisServer
-{
     typedef websocketpp::server<websocketpp::config::asio> ws_server_t;
     // pull out the type of messages sent by our config
     typedef ws_server_t::message_ptr message_ptr;
