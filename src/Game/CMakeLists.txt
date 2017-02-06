@@ -3,5 +3,8 @@ FILE(GLOB SRC
     "SpaceExploration/*.cpp"
     "CreatureObservation/*.h"
     "CreatureObservation/*.cpp"
+    "SpeciesCatalogue/*.h"
+    "SpeciesCatalogue/*.cpp"
+
 )
 ADD_LIBRARY(game ${SRC})

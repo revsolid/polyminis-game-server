@@ -25,7 +25,7 @@ SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
 
 TARGET_LINK_LIBRARIES(Main game)
 TARGET_LINK_LIBRARIES(Main core)
-TARGET_LINK_LIBRARIES(Main aws-cpp-sdk-gamelift-server)
+# TARGET_LINK_LIBRARIES(Main aws-cpp-sdk-gamelift-server)
 TARGET_LINK_LIBRARIES(Main sioclient)
 TARGET_LINK_LIBRARIES(Main boost_date_time boost_system)
 SET(CMAKE_INSTALL_RPATH "$ORIGIN")

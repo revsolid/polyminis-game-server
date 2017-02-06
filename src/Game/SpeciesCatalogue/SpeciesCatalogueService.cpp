@@ -1,4 +1,5 @@
 #include "SpeciesCatalogueService.h"
+#include "Core/JsonHelpers.h"
 
 namespace SpeciesCatalogue
 {
@@ -15,8 +16,8 @@ namespace SpeciesCatalogue
     
     picojson::object SpeciesCatalogueService::SpeciesCatalogueEndpoint(picojson::value& request)
     {
-        std::string command = PolyminisServer::JsonHelpers::json_get_string(request, "Command");
-        auto payload = PolyminisServer::JsonHelpers::json_get_object(request, "Payload");
+        std::string command = JsonHelpers::json_get_string(request, "Command");
+        auto payload = JsonHelpers::json_get_object(request, "Payload");
 
         picojson::object to_ret;
         if (command == "SAVE_SPECIES")
@@ -26,7 +27,7 @@ namespace SpeciesCatalogue
         }
         else
         {
-            to_ret = PolyminisServer::JsonHelpers::json_create_error("Command Not Found");
+            to_ret = JsonHelpers::json_create_error("Command Not Found");
         }
         return std::move(to_ret);
     }

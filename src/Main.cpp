@@ -6,7 +6,7 @@
 #include "Game/SpaceExploration/PlanetManager.h"
 #include "Game/SpaceExploration/SpaceMap.h"
 #include "Game/CreatureObservation/CreatureObservationService.h"
-//#include "Game/SpeciesDesigner/SpeciesDesignerService.h"
+#include "Game/SpeciesCatalogue/SpeciesCatalogueService.h"
 
 int main()
 {
@@ -31,7 +31,9 @@ int main()
         CreatureObservation::SimulationServerConfig simServerCfg { std::string("localhost"), 8080 };
         std::cout << "Adding Creature Observation..." << std::endl;
         CreatureObservation::CreatureObservationService creatureObs(server, simServerCfg);
-        //SpeciesDesigner::SpeciesDesignerService speciesDs(server);
+        //SpeciesCatalogue::SpeciesCatalogueService speciesCtlg(server);
+        //std::cout << "Adding Species Catalogue..." << std::endl;
+
         std::cout << "Starting Server..." << std::endl;
         server.RunServer();
     }
