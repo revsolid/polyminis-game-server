@@ -13,11 +13,13 @@ To build within UNIX/Linux:
 * You MUST install Boost C++ Library;
 
 To build:
+```
 > cd build
 > ./build.sh
-
-Then to run:
+```
+To run:
+```
 > cd bin
-./Main
-
+> ./Main
+```
 Ping Roy if things don't work or if you have problem setting up.
