@@ -1,19 +1,19 @@
-#include "SpeciesDesignerService.h"
+#include "SpeciesCatalogueService.h"
 
-namespace SpeciesDesigner
+namespace SpeciesCatalogue
 {
-    SpeciesDesignerService::SpeciesDesignerService(PolyminisServer::WSServer& server)
+    SpeciesCatalogueService::SpeciesCatalogueService(PolyminisServer::WSServer& server)
     {
         auto wss = std::make_shared<PolyminisServer::WSService>();
-        wss->mServiceName = "species_designer";
+        wss->mServiceName = "species_catalogue";
         wss->mHandler = [=](picojson::value& request)
         {
-            return this->SpeciesDesignerEndpoint(request);
+            return this->SpeciesCatalogueEndpoint(request);
         };
         server.AddService(wss);
     }
     
-    picojson::object SpeciesDesignerService::SpeciesDesignerEndpoint(picojson::value& request)
+    picojson::object SpeciesCatalogueService::SpeciesCatalogueEndpoint(picojson::value& request)
     {
         std::string command = PolyminisServer::JsonHelpers::json_get_string(request, "Command");
         auto payload = PolyminisServer::JsonHelpers::json_get_object(request, "Payload");
