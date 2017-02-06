@@ -2,23 +2,22 @@
 Polyminis Game Server
 
 
-Game Server.
+Game Server. Talks to client directly through websocket and other servers using HTTP.
 
-Note this MUST be run inside an Amazon Linux box (what comes with your free tier).
+Note this intended to be deployed inside an Amazon Linux box (what comes with your free tier). 
+However with proper setup can build/run in UNIX/LINUX environment (yes your own computer).
 
-You MUST upgrade your aws cli:
-> sudo pip install --upgrade awscli
-
-or the aws_build_upload.sh command will fail.
-
-You MUST set your credentials in aws or the aws_build_upload.sh command will fail. Follow [this](https://s3.amazonaws.com/gamedev-tutorials/Tutorials/GameLift-Getting_started-(02)_Uploading_your_server_build.pdf) instructions to create the policy and user
-> aws configure
-
+To build within UNIX/Linux: 
+* You MUST install [CMake](https://cmake.org/install/);
+* You MUST install Clang;
+* You MUST install Boost C++ Library;
 
 To build:
 > cd build
 > ./build.sh
 
-To upload build to amazon:
-> cd build
-> ./aws_build_upload.sh
+Then to run:
+> cd bin
+./Main
+
+Ping Roy if things don't work or if you have problem setting up.
