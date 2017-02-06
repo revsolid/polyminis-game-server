@@ -47,7 +47,7 @@ namespace SpaceExploration
                 to_ret = CreatePlanetaryPayload();
             }
         }
-        else if (command == "WARP")
+        else if (command == "ATTEMPT_WARP")
         {
             Coord destPoint;
             destPoint.x = x;
