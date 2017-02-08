@@ -33,28 +33,25 @@ namespace SpaceExploration
             picojson::array all_planets =  JsonHelpers::json_get_array(planets_value, "Items");
 
             std::cout << "Adding planets to Planet Manager..." << std::endl;
-            for (auto a : all_planets)
+            for (auto planet : all_planets)
             {
-
                 float x   = 0.0f;
                 float y   = 0.0f;
                 int   pid = 1;
-                if (payload.count("Position") > 0)
+                if (JsonHelpers::json_has_field(planet, "SpacePosition"))
                 {
-                    auto position_json = payload["Position"];
+                    auto position_json = picojson::value(JsonHelpers::json_get_object(planet, "SpacePosition"));
                     x = JsonHelpers::json_get_float(position_json, "x");
                     y = JsonHelpers::json_get_float(position_json, "y");
                 }
 
-                if (payload.count("PlanetId") > 0)
+                if (JsonHelpers::json_has_field(planet, "PlanetId"))
                 {
-                    auto id_json = payload["PlanetId"];
-                    id_json = JsonHelpers::json_get_float(position_json, "y");
+                    pid = JsonHelpers::json_get_int(planet, "PlanetId");
                 }
 
-
-                std::cout << "  Adding Planet at: (" << x << "," << y << ")" << std::endl;
-                mPlanetManager.AddPlanet(x, y, p_id);
+                std::cout << "  Adding Planet " << pid << " at: (" << x << "," << y << ")" << std::endl;
+                mPlanetManager.AddPlanet(x, y, pid);
             }
 	}
         catch (websocketpp::exception const & e)

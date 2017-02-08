@@ -46,7 +46,7 @@ namespace JsonHelpers
         return (float) it->second.get<double>();
     }
 
-    int json_get_int(picojson::value& v, const std::string& filedname)
+    int json_get_int(picojson::value& v, const std::string& fieldname)
     {
         //check if the type of the value is "object"
         if (! v.is<picojson::object>())
@@ -64,7 +64,7 @@ namespace JsonHelpers
            std::cout << "Error field: "<< fieldname << " not found" << std::endl;
            return 0;
         }
-        return it->second.get<int>();
+        return (int)it->second.get<double>();
     }
 
     const picojson::object& json_get_object(picojson::value& v, const std::string& fieldname)
@@ -105,6 +105,18 @@ namespace JsonHelpers
             return std::move(picojson::array());
         }
         return it->second.get<picojson::array>();
+    }
+
+    bool json_has_field(picojson::value& v, const std::string& fieldname)
+    {
+        if (! v.is<picojson::object>())
+        {
+            // ERROR
+            std::cout << "Error value is not an object (json_has_field)" << std::endl;
+            return false;
+        }
+        const picojson::value::object& obj = v.get<picojson::object>();
+        return obj.count(fieldname) > 0;
     }
 
     picojson::object json_create_error(const std::string& e_msg)

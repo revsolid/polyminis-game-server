@@ -14,7 +14,7 @@ int main()
         std::cout << "Creating Server..." << std::endl;
         PolyminisServer::WSServer server;
         std::cout << "Done.." << std::endl;
-	PolyminisServer::ServerCfg almanacServer { "localhost", 8081 };
+	    PolyminisServer::ServerCfg almanacServer { "localhost", 8081 };
 
         PlanetManager pManager({});
 

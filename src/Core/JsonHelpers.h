@@ -10,6 +10,8 @@ namespace JsonHelpers
     const picojson::array& json_get_array(picojson::value& v, const std::string& fieldname);
 
 
+    bool json_has_field(picojson::value& v, const std::string& fieldname);
+
     // ERRORS
     picojson::object json_create_error(const std::string& e_msg);
 }

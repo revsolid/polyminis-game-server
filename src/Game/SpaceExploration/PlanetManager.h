@@ -17,11 +17,14 @@ public:
     std::shared_ptr<Planet> GetPlanet(unsigned int inId) const;
     std::shared_ptr<Planet> GetPlanet(Coord point) const; // if there is a planet close to point
 
+    int GetNextPlanetId();
+
     // return a vector for each planet visible 
     // from a point
     picojson::array GetVisiblePlanets(Coord inCoord, float distance);
 
 private:
     std::vector<Planet> mPlanets;
+    int mNextPlanetId;
 };
 
