@@ -1,11 +1,14 @@
 #include "SpaceExplorationService.h"
 #include "Core/JsonHelpers.h"
+#include "Core/HttpClient.h"
 
 namespace SpaceExploration
 {
     SpaceExplorationService::SpaceExplorationService(PolyminisServer::WSServer& server,
-                                                     PlanetManager& pManager) :
-                                                     mPlanetManager(pManager)
+                                                     PlanetManager& pManager,
+                                                     PolyminisServer::ServerCfg almanacServerCfg) :
+                                                     mPlanetManager(pManager),
+                                                     mAlmanacServerCfg(almanacServerCfg)
     {
         auto wss = std::make_shared<PolyminisServer::WSService>();
         wss->mServiceName = "space_exploration";
@@ -14,8 +17,52 @@ namespace SpaceExploration
                              return this->SpaceExplorationEndpoint(request);
                          };
         server.AddService(wss);
+
+	try
+	{
+            std::cout << "Requesting Almanac Server for Persistent Planets..." << std::endl;
+            picojson::object planets_resp = PolyminisServer::HttpClient::Request(mAlmanacServerCfg.host,
+                                                                                 mAlmanacServerCfg.port,
+                                                                                 "/persistence/planets/",
+                                                                                 PolyminisServer::HttpMethod::GET,
+                                                                                 picojson::object());
+
+            auto planets_resp_v = picojson::value(planets_resp);
+            auto planets = JsonHelpers::json_get_object(planets_resp_v, "Response");
+            auto planets_value = picojson::value(planets);
+            picojson::array all_planets =  JsonHelpers::json_get_array(planets_value, "Items");
+
+            std::cout << "Adding planets to Planet Manager..." << std::endl;
+            for (auto a : all_planets)
+            {
+
+                float x   = 0.0f;
+                float y   = 0.0f;
+                int   pid = 1;
+                if (payload.count("Position") > 0)
+                {
+                    auto position_json = payload["Position"];
+                    x = JsonHelpers::json_get_float(position_json, "x");
+                    y = JsonHelpers::json_get_float(position_json, "y");
+                }
+
+                if (payload.count("PlanetId") > 0)
+                {
+                    auto id_json = payload["PlanetId"];
+                    id_json = JsonHelpers::json_get_float(position_json, "y");
+                }
+
+
+                std::cout << "  Adding Planet at: (" << x << "," << y << ")" << std::endl;
+                mPlanetManager.AddPlanet(x, y, p_id);
+            }
+	}
+        catch (websocketpp::exception const & e)
+        {
+            std::cout << e.what() << std::endl;
+        }
     }
-    
+
     picojson::object SpaceExplorationService::SpaceExplorationEndpoint(picojson::value& request)
     {
         std::string command = JsonHelpers::json_get_string(request, "Command");
@@ -27,8 +74,8 @@ namespace SpaceExploration
         }
         auto position_json = payload["Position"];
         float x = JsonHelpers::json_get_float(position_json, "x");
-        float y = JsonHelpers::json_get_float(position_json, "y");   
-    
+        float y = JsonHelpers::json_get_float(position_json, "y");
+
         picojson::object to_ret;
         if (command == "INIT")
         {
@@ -71,7 +118,7 @@ namespace SpaceExploration
         picojson::array visiblePlanets = mPlanetManager.GetVisiblePlanets(mSpaceMapSession.GetPos(), mSpaceMapSession.GetVisibilityRange());
         if (!visiblePlanets.empty())
         {
-            picojson::object planetsSpawnEvent; 
+            picojson::object planetsSpawnEvent;
             planetsSpawnEvent["Service"] = picojson::value("space_exploration");
             planetsSpawnEvent["EventString"] = picojson::value("SPAWN_PLANETS");
             planetsSpawnEvent["Planets"] = picojson::value(visiblePlanets);

@@ -3,11 +3,7 @@
 
 namespace CreatureObservation
 {
-    struct SimulationServerConfig
-    {
-        std::string host;
-        int port;
-    };
+    typedef PolyminisServer::ServerCfg SimulationServerConfig;
 
     class CreatureObservationService
     {
