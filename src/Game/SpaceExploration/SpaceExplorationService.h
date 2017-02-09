@@ -8,8 +8,9 @@ namespace SpaceExploration
     class SpaceExplorationService
     {
     public:
-        SpaceExplorationService(PolyminisServer::WSServer& server,
-                                PlanetManager& pManager);
+	SpaceExplorationService(PolyminisServer::WSServer& server,
+                                PlanetManager& pManager,
+				PolyminisServer::ServerCfg almanacServerCfg);
         picojson::object SpaceExplorationEndpoint(picojson::value& command);
     private:
         picojson::object CreatePlanetaryPayload();
@@ -18,5 +19,6 @@ namespace SpaceExploration
         // Members
         PlanetManager& mPlanetManager;
         SpaceMapSession mSpaceMapSession; 
+	PolyminisServer::ServerCfg mAlmanacServerCfg;
     };
 }

@@ -2,13 +2,12 @@
 
 
 
-PlanetManager::PlanetManager(const std::initializer_list<std::pair<float, float>>& list)
+PlanetManager::PlanetManager(const std::initializer_list<std::pair<float, float>>& list) : mNextPlanetId(0)
 {
-    unsigned int id = 0;
     for (auto i : list)
     {
+        unsigned int id = GetNextPlanetId();
         mPlanets.push_back(Planet(i.first, i.second, id));
-        ++id;
     }
 }    
 
@@ -40,12 +39,13 @@ std::shared_ptr<Planet> PlanetManager::GetPlanet(Coord point) const
 
 void PlanetManager::AddPlanet(Planet inPlanet)
 {
+    mNextPlanetId = inPlanet.GetID() + 1;
     mPlanets.push_back(inPlanet);
 }
 
 void PlanetManager::AddPlanet(float x, float y, unsigned int id)
 {
-    mPlanets.push_back(Planet(x, y, id));
+    AddPlanet(Planet(x, y, id));
 }
 
 picojson::array PlanetManager::GetVisiblePlanets(Coord inCoord, float distance)
@@ -69,4 +69,9 @@ picojson::array PlanetManager::GetVisiblePlanets(Coord inCoord, float distance)
     }
 
     return retVal;
+}
+
+int PlanetManager::GetNextPlanetId()
+{
+    return mNextPlanetId++;
 }

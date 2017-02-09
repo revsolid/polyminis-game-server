@@ -7,9 +7,14 @@
 
 namespace PolyminisServer
 {
-    struct AlmanacServerCfg
+    struct ServerCfg
     {
-        
+        std::string host;
+        int port;
+        ServerCfg(std::string host, int port) :
+	host(host),
+        port(port)
+        {}
     };
 
     typedef websocketpp::server<websocketpp::config::asio> ws_server_t;

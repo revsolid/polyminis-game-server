@@ -15,6 +15,8 @@ int main()
         std::cout << "Creating Server..." << std::endl;
         PolyminisServer::WSServer server;
         std::cout << "Done.." << std::endl;
+	    PolyminisServer::ServerCfg almanacServer { "localhost", 8081 };
+
         PlanetManager pManager({});
 
         int id = 0;
@@ -26,7 +28,7 @@ int main()
             }
         }
         std::cout << "Adding Space Exploration..." << std::endl;
-        SpaceExploration::SpaceExplorationService spaceEx(server, pManager);
+        SpaceExploration::SpaceExplorationService spaceEx(server, pManager, almanacServer);
 
         CreatureObservation::SimulationServerConfig simServerCfg { std::string("localhost"), 8080 };
         std::cout << "Adding Creature Observation..." << std::endl;
