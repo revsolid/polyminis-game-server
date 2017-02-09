@@ -64,6 +64,7 @@ picojson::array PlanetManager::GetVisiblePlanets(Coord inCoord, float distance)
 
             obj["ID"] = picojson::value((double)p.GetID());
             obj["SpaceCoords"] = picojson::value(position_obj);
+            obj["PlanetName"] = picojson::value(p.GetName());
             retVal.push_back(picojson::value(obj));
         }
     }

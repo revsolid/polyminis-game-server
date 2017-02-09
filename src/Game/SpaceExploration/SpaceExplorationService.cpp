@@ -38,6 +38,13 @@ namespace SpaceExploration
                 float x   = 0.0f;
                 float y   = 0.0f;
                 int   pid = 1;
+
+                float t_min = 0.0f;
+                float t_max = 0.0f;
+                float ph_min = 0.0f;
+                float ph_max = 0.0f;
+
+                std::string name = "Test Planet";
                 if (JsonHelpers::json_has_field(planet, "SpacePosition"))
                 {
                     auto position_json = picojson::value(JsonHelpers::json_get_object(planet, "SpacePosition"));
@@ -50,8 +57,30 @@ namespace SpaceExploration
                     pid = JsonHelpers::json_get_int(planet, "PlanetId");
                 }
 
-                std::cout << "  Adding Planet " << pid << " at: (" << x << "," << y << ")" << std::endl;
-                mPlanetManager.AddPlanet(x, y, pid);
+                
+                if (JsonHelpers::json_has_field(planet, "Temperature"))
+                {
+                    auto temp_json = picojson::value(JsonHelpers::json_get_object(planet, "Temperature"));
+                    t_min = JsonHelpers::json_get_float(temp_json, "Min");
+                    t_max = JsonHelpers::json_get_float(temp_json, "Max");
+                }
+
+                if (JsonHelpers::json_has_field(planet, "Ph"))
+                {
+                    auto ph_json = picojson::value(JsonHelpers::json_get_object(planet, "Ph"));
+                    ph_min = JsonHelpers::json_get_float(ph_json, "Min");
+                    ph_max = JsonHelpers::json_get_float(ph_json, "Max");
+                }
+
+                if (JsonHelpers::json_has_field(planet, "PlanetName"))
+                {
+                    name = JsonHelpers::json_get_string(planet, "PlanetName");
+                }
+
+                std::cout << "  Adding Planet " << name << " with: " << pid << " at: (" << x << "," << y << ")" << std::endl;
+                std::cout << "    Temperature [" << t_min << "," << t_max << "]" << std::endl;
+                std::cout << "    Ph          [" << ph_min << "," << ph_max << "]" << std::endl;
+                mPlanetManager.AddPlanet(Planet(x, y, pid, t_min, t_max, ph_min, ph_max, name));
             }
 	}
         catch (websocketpp::exception const & e)
@@ -63,7 +92,7 @@ namespace SpaceExploration
     picojson::object SpaceExplorationService::SpaceExplorationEndpoint(picojson::value& request)
     {
         std::string command = JsonHelpers::json_get_string(request, "Command");
-        auto payload = JsonHelpers::json_get_object(request, "Payload");
+        auto payload = JsonHelpers::json_get_as_object(request);
 
         if (payload.count("Position") == 0)
         {

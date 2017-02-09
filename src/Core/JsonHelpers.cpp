@@ -87,6 +87,17 @@ namespace JsonHelpers
         return it->second.get<picojson::object>();
     }
 
+    const picojson::object& json_get_as_object(picojson::value& v)
+    {
+        if (! v.is<picojson::object>())
+        {
+            // ERROR
+            std::cout << "Error value is not an object (json_get_object)" << std::endl;
+            return std::move(picojson::object());
+        }
+        return v.get<picojson::object>();
+    }
+
     const picojson::array& json_get_array(picojson::value& v, const std::string& fieldname)
     {
         if (! v.is<picojson::object>())

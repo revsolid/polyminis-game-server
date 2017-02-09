@@ -9,6 +9,7 @@ namespace JsonHelpers
     const picojson::object& json_get_object(picojson::value& v, const std::string& fieldname);
     const picojson::array& json_get_array(picojson::value& v, const std::string& fieldname);
 
+    const picojson::object& json_get_as_object(picojson::value& v);
 
     bool json_has_field(picojson::value& v, const std::string& fieldname);
 

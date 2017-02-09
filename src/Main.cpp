@@ -18,14 +18,6 @@ int main()
 
         PlanetManager pManager({});
 
-        int id = 0;
-        for(float i = -500.0f; i <= 500.0f; i += 200)
-        {
-            for(float j = -500.0f; j <= 500.0f; j += 200)
-            {
-                pManager.AddPlanet(i, j, id++);
-            }
-        }
         std::cout << "Adding Space Exploration..." << std::endl;
         SpaceExploration::SpaceExplorationService spaceEx(server, pManager, almanacServer);
 
