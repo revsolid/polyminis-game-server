@@ -7,31 +7,31 @@
 
 namespace PolyminisServer
 {
-    namespace JsonHelpers
+    struct ServerCfg
     {
-        std::string json_get_string(picojson::value& v, const std::string& fieldname);
-        float json_get_float(picojson::value& v, const std::string& fieldname);
+        std::string host;
+        int port;
+        ServerCfg(std::string host, int port) :
+	host(host),
+        port(port)
+        {}
+    };
 
-        const picojson::object& json_get_object(picojson::value& v, const std::string& fieldname);
-
-
-        // ERRORS
-        picojson::object json_create_error(const std::string& e_msg);
-    }
-}
-
-namespace PolyminisServer
-{
     typedef websocketpp::server<websocketpp::config::asio> ws_server_t;
     // pull out the type of messages sent by our config
     typedef ws_server_t::message_ptr message_ptr;
      
     typedef std::function<picojson::object(picojson::value&)> ws_service_handler_t;
-    
+
     struct WSService
     {
       std::string mServiceName;
       ws_service_handler_t mHandler; 
+    };
+
+    struct SessionData
+    {
+        bool b;
     };
     
     class WSServer
@@ -53,16 +53,24 @@ namespace PolyminisServer
         }
       
         void RunServer();
+        void OnConnectionOpen(websocketpp::connection_hdl hdl);
+        void OnConnectionClose(websocketpp::connection_hdl hdl);
         void OnMessageReceived(websocketpp::connection_hdl hdl, message_ptr msg);
   
         void AddService(std::shared_ptr<WSService> service);
         void RemoveService(std::string serviceName);
 
-        picojson::object ControlEndpoint(picojson::value& request);
-
         void SendMessage(picojson::value& message, websocketpp::connection_hdl& hdl, message_ptr msgptr);
+
+        picojson::object ControlEndpoint(picojson::value& request);
     
     private:
+
+        // Members
+ 
+        // Data to keep per Session
+        std::unordered_map<websocketpp::connection_hdl, SessionData,
+                           std::owner_less<websocketpp::connection_hdl>> mConnections;
         ws_server_t mServer;
         std::unordered_map<std::string, std::shared_ptr<WSService>> mServices;
     };
