@@ -27,7 +27,7 @@ namespace CreatureObservation
 
         auto wss = std::make_shared<PolyminisServer::WSService>();
         wss->mServiceName = "creature_observation";
-        wss->mHandler =  [=] (picojson::value& request)
+        wss->mHandler =  [=] (picojson::value& request, PolyminisServer::SessionData& sd)
                          {
                              return this->CreatureObservationEndpoint(request);
                          };

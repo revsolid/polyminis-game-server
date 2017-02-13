@@ -25,13 +25,22 @@ picojson::object HttpClient::Request(const std::string& host, int port,
     }
     std::cout << "  Done.." << std::endl;
 
-    beast::http::request<beast::http::empty_body> req;
+    beast::http::request<beast::http::string_body> req;
 
     switch(method)
     {
     case HttpMethod::POST:
         req.method = "POST";
         break;
+
+    case HttpMethod::PUT:
+        req.method = "PUT";
+        break;
+
+    case HttpMethod::DELETE:
+        req.method = "DELETE";
+        break;
+
     case HttpMethod::GET:
     // Fallthrough
     default:
@@ -41,6 +50,10 @@ picojson::object HttpClient::Request(const std::string& host, int port,
 
     req.url = std::string(url);
     req.version = 11;
+
+    req.body = picojson::value(payload).serialize();
+    req.fields.insert("Content-Type", "application/json");
+
     beast::http::prepare(req);
     beast::http::write(sock, req);
 
