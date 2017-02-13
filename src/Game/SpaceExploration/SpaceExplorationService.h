@@ -8,17 +8,19 @@ namespace SpaceExploration
     class SpaceExplorationService
     {
     public:
-	SpaceExplorationService(PolyminisServer::WSServer& server,
+        SpaceExplorationService(PolyminisServer::WSServer& server,
                                 PlanetManager& pManager,
-				PolyminisServer::ServerCfg almanacServerCfg);
-        picojson::object SpaceExplorationEndpoint(picojson::value& command);
+                                PolyminisServer::ServerCfg almanacServerCfg);
+        picojson::object SpaceExplorationEndpoint(picojson::value& request, PolyminisServer::SessionData& sd);
     private:
-        picojson::object CreatePlanetaryPayload();
-        picojson::object CreateWarpPayload(Coord dest);
+        void CreatePlanetaryPayload(picojson::object& planetsSpawnEvent, const Coord& pos, float visRange);
+        void CreateWarpPayload(picojson::object& warpToPlanetEvent, const Coord& dest);
+        bool SavePositionOnDB(const Coord& pos, const std::string& userName);
+
+        float CalcWarpCost(const Coord& start, const Coord& target);
 
         // Members
         PlanetManager& mPlanetManager;
-        SpaceMapSession mSpaceMapSession; 
-	PolyminisServer::ServerCfg mAlmanacServerCfg;
+        PolyminisServer::ServerCfg mAlmanacServerCfg;
     };
 }

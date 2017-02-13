@@ -8,6 +8,36 @@ namespace PolyminisServer
     using websocketpp::lib::placeholders::_2;
     using websocketpp::lib::bind;
 
+
+    void WSServer::RunServer()
+    {
+        // Set logging settings
+        mServer.set_access_channels(websocketpp::log::alevel::all);
+        mServer.clear_access_channels(websocketpp::log::alevel::frame_payload);
+        // Initialize Asio
+        mServer.init_asio();
+
+
+        // Register Open / Close conn handlers
+        mServer.set_open_handler(bind(&WSServer::OnConnectionOpen,this, _1));
+        mServer.set_close_handler(bind(&WSServer::OnConnectionClose,this, _1));
+
+        // Register our message handler
+        mServer.set_message_handler(bind(&WSServer::OnMessageReceived, this, _1, _2));
+        // TODO: Port shouldn't be hardcoded
+        mServer.listen(8080);
+        // Start the server accept loop
+        mServer.start_accept();
+        // Start the ASIO io_service run loop
+        mServer.run();
+    }
+
+    void WSServer::OnConnectionOpen(websocketpp::connection_hdl hdl)
+    {
+        SessionData session;
+        mConnections[hdl] = session;
+    }
+
     void WSServer::OnMessageReceived(websocketpp::connection_hdl hdl, message_ptr msg) 
     {
         std::string message = msg->get_payload();
@@ -27,7 +57,7 @@ namespace PolyminisServer
         if (it != mServices.end())
         {
             std::cout << "Service Found: " << message << std::endl;
-            response = it->second->mHandler(v);
+            response = it->second->mHandler(v, mConnections[hdl]);
         }
         else
         {
@@ -39,24 +69,11 @@ namespace PolyminisServer
             auto pv = picojson::value(response);
             SendMessage(pv, hdl, msg);
         }
-     }
-    
-    void WSServer::RunServer()
-    {
-        // Set logging settings
-        mServer.set_access_channels(websocketpp::log::alevel::all);
-        mServer.clear_access_channels(websocketpp::log::alevel::frame_payload);
-        // Initialize Asio
-        mServer.init_asio();
+    }
 
-        // Register our message handler
-        mServer.set_message_handler(bind(&WSServer::OnMessageReceived, this, _1, _2));
-        // TODO: Port shouldn't be hardcoded
-        mServer.listen(8080);
-        // Start the server accept loop
-        mServer.start_accept();
-        // Start the ASIO io_service run loop
-        mServer.run();
+    void WSServer::OnConnectionClose(websocketpp::connection_hdl hdl)
+    {
+        mConnections.erase(hdl);
     }
 
     picojson::object WSServer::ControlEndpoint(picojson::value& request)

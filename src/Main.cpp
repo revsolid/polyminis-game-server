@@ -6,6 +6,7 @@
 #include "Game/SpaceExploration/PlanetManager.h"
 #include "Game/SpaceExploration/SpaceMap.h"
 #include "Game/CreatureObservation/CreatureObservationService.h"
+#include "Game/User/UserService.h"
 
 int main()
 {
@@ -20,6 +21,9 @@ int main()
 
         std::cout << "Adding Space Exploration..." << std::endl;
         SpaceExploration::SpaceExplorationService spaceEx(server, pManager, almanacServer);
+
+        std::cout << "Adding User Service..." << std::endl;
+        User::UserService userService(server, almanacServer);
 
         CreatureObservation::SimulationServerConfig simServerCfg { std::string("localhost"), 8080 };
         std::cout << "Adding Creature Observation..." << std::endl;

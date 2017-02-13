@@ -7,7 +7,9 @@ namespace PolyminisServer
     enum HttpMethod
     {
         GET,
-        POST
+        POST,
+        PUT,
+        DELETE
     };
     struct HttpClient
     {
