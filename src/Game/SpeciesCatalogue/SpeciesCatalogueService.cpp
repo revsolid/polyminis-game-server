@@ -20,12 +20,22 @@ namespace SpeciesCatalogue
     picojson::object SpeciesCatalogueService::SpeciesCatalogueEndpoint(picojson::value& request)
     {
         std::string command = JsonHelpers::json_get_string(request, "Command");
-        auto payload = JsonHelpers::json_get_object(request, "Payload");
+        auto payload = JsonHelpers::json_get_as_object(request);
 
+        if (payload.count("Species") == 0)
+        {
+            return JsonHelpers::json_create_error("Error - Species not sent");
+        }
+        auto species_value = picojson::value(payload);
+        auto specieslist_json = JsonHelpers::json_get_array(species_value, "Species");
         picojson::object to_ret;
         if (command == "SAVE_SPECIES")
         {
-            std::cout << "SAVE_SPECIES command Received!" << std::endl;
+            for (picojson::array::iterator iter = specieslist_json.begin(); iter != specieslist_json.end(); ++iter) 
+            {
+                std::cout << "Species Received: [" << (*iter).get("Name").get<std::string>() << "]"<< std::endl;
+            }
+            //std::cout << "SAVE_SPECIES command Received!" << std::endl;
             to_ret = picojson::object();
         }
         else

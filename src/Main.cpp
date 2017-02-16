@@ -29,8 +29,9 @@ int main()
         CreatureObservation::SimulationServerConfig simServerCfg { std::string("localhost"), 8080 };
         std::cout << "Adding Creature Observation..." << std::endl;
         CreatureObservation::CreatureObservationService creatureObs(server, simServerCfg);
-        //SpeciesCatalogue::SpeciesCatalogueService speciesCtlg(server);
-        //std::cout << "Adding Species Catalogue..." << std::endl;
+     
+        std::cout << "Adding Species Catalogue..." << std::endl;
+        SpeciesCatalogue::SpeciesCatalogueService speciesCtlg(server, almanacServer);
 
         std::cout << "Starting Server..." << std::endl;
         server.RunServer();
