@@ -1,9 +1,12 @@
 #include "SpeciesCatalogueService.h"
 #include "Core/JsonHelpers.h"
+#include "Core/HttpClient.h"
 
 namespace SpeciesCatalogue
 {
-    SpeciesCatalogueService::SpeciesCatalogueService(PolyminisServer::WSServer& server)
+    SpeciesCatalogueService::SpeciesCatalogueService(PolyminisServer::WSServer& server,                                                     PolyminisServer::ServerCfg almanacServerCfg) :
+                                                     PolyminisServer::ServerCfg almanacServerCfg) :
+                                                     mAlmanacServerCfg(almanacServerCfg)
     {
         auto wss = std::make_shared<PolyminisServer::WSService>();
         wss->mServiceName = "species_catalogue";
