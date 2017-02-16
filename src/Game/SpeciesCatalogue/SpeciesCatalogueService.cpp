@@ -4,13 +4,13 @@
 
 namespace SpeciesCatalogue
 {
-    SpeciesCatalogueService::SpeciesCatalogueService(PolyminisServer::WSServer& server,                                                     PolyminisServer::ServerCfg almanacServerCfg) :
+    SpeciesCatalogueService::SpeciesCatalogueService(PolyminisServer::WSServer& server,
                                                      PolyminisServer::ServerCfg almanacServerCfg) :
                                                      mAlmanacServerCfg(almanacServerCfg)
     {
         auto wss = std::make_shared<PolyminisServer::WSService>();
         wss->mServiceName = "species_catalogue";
-        wss->mHandler = [=](picojson::value& request)
+        wss->mHandler =  [=] (picojson::value& request, PolyminisServer::SessionData& sd)
         {
             return this->SpeciesCatalogueEndpoint(request);
         };

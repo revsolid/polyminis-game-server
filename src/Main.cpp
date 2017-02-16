@@ -7,6 +7,7 @@
 #include "Game/SpaceExploration/SpaceMap.h"
 #include "Game/CreatureObservation/CreatureObservationService.h"
 #include "Game/SpeciesCatalogue/SpeciesCatalogueService.h"
+#include "Game/User/UserService.h"
 
 int main()
 {
@@ -19,16 +20,11 @@ int main()
 
         PlanetManager pManager({});
 
-        int id = 0;
-        for(float i = -500.0f; i <= 500.0f; i += 200)
-        {
-            for(float j = -500.0f; j <= 500.0f; j += 200)
-            {
-                pManager.AddPlanet(i, j, id++);
-            }
-        }
         std::cout << "Adding Space Exploration..." << std::endl;
         SpaceExploration::SpaceExplorationService spaceEx(server, pManager, almanacServer);
+
+        std::cout << "Adding User Service..." << std::endl;
+        User::UserService userService(server, almanacServer);
 
         CreatureObservation::SimulationServerConfig simServerCfg { std::string("localhost"), 8080 };
         std::cout << "Adding Creature Observation..." << std::endl;

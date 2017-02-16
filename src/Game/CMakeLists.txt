@@ -1,10 +1,11 @@
 FILE(GLOB SRC
-    "SpaceExploration/*.h"
-    "SpaceExploration/*.cpp"
     "CreatureObservation/*.h"
     "CreatureObservation/*.cpp"
     "SpeciesCatalogue/*.h"
     "SpeciesCatalogue/*.cpp"
-
+    "SpaceExploration/*.h"
+    "SpaceExploration/*.cpp"
+    "User/*.h"
+    "User/*.cpp"
 )
 ADD_LIBRARY(game ${SRC})

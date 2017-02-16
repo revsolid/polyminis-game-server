@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <websocketpp/config/asio_no_tls.hpp>
 #include <websocketpp/server.hpp>
+#include "Core/Types.h"
 
 namespace PolyminisServer
 {
@@ -12,16 +13,31 @@ namespace PolyminisServer
         std::string host;
         int port;
         ServerCfg(std::string host, int port) :
-	host(host),
+        host(host),
         port(port)
         {}
     };
 
     typedef websocketpp::server<websocketpp::config::asio> ws_server_t;
-    // pull out the type of messages sent by our config
     typedef ws_server_t::message_ptr message_ptr;
-     
-    typedef std::function<picojson::object(picojson::value&)> ws_service_handler_t;
+
+    // NOTE: There is a bit of a layering violation as the SessionData is carrying game-specific data,
+    // this should be easy to solve with templates or inheritance (TODO)
+    struct SessionData
+    {
+        // int SimServerID 
+        
+        std::string UserName;
+
+        float       BiomassAvailable;
+
+        Coord       Position; 
+
+        float       VisibilityRange = 600.0f;
+    };
+    
+
+    typedef std::function<picojson::object(picojson::value&, SessionData&)> ws_service_handler_t;
 
     struct WSService
     {
@@ -29,11 +45,6 @@ namespace PolyminisServer
       ws_service_handler_t mHandler; 
     };
 
-    struct SessionData
-    {
-        bool b;
-    };
-    
     class WSServer
     {
     public:
@@ -41,7 +52,7 @@ namespace PolyminisServer
         {
             std::shared_ptr<WSService> wss = std::make_shared<WSService>();
             wss->mServiceName = "control";
-            wss->mHandler =  [=] (picojson::value& request)
+            wss->mHandler =  [=] (picojson::value& request, SessionData& sd)
                              {
                                  return this->ControlEndpoint(request);
                              };
@@ -69,8 +80,10 @@ namespace PolyminisServer
         // Members
  
         // Data to keep per Session
-        std::unordered_map<websocketpp::connection_hdl, SessionData,
-                           std::owner_less<websocketpp::connection_hdl>> mConnections;
+        std::map<websocketpp::connection_hdl, SessionData, std::owner_less<websocketpp::connection_hdl>> mConnections;
+
+       // std::map<connection_hdl,connection_data,std::owner_less<connection_hdl>> con_list;
+
         ws_server_t mServer;
         std::unordered_map<std::string, std::shared_ptr<WSService>> mServices;
     };
