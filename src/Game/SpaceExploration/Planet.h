@@ -13,6 +13,8 @@ public:
     Coord GetPos() const;
     int GetID() const;
     const std::string& GetName() const;
+    Range<float> GetTemperatureRange() const;
+    Range<float> GetPhRange() const;
 
     // Pass in a position and check if it's visible. Right now it just calculates 
     // euclidean distance but later we can do optimization
