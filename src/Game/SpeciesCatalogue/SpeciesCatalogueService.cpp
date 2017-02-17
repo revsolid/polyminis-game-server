@@ -31,10 +31,15 @@ namespace SpeciesCatalogue
         picojson::object to_ret;
         if (command == "SAVE_SPECIES")
         {
-            for (picojson::array::iterator iter = specieslist_json.begin(); iter != specieslist_json.end(); ++iter) 
+            if(mCatalogueSession.AttemptSaveSpecies(specieslist_json))
             {
-                std::cout << "Species Received: [" << (*iter).get("Name").get<std::string>() << "]"<< std::endl;
+                std::cout << "New Species Saved to game server. " << std::endl;
             }
+            else
+            {
+                std::cout << "Failted saving to game server" << std::endl;
+            }
+            
             //std::cout << "SAVE_SPECIES command Received!" << std::endl;
             to_ret = picojson::object();
         }
