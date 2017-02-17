@@ -57,14 +57,29 @@ picojson::array PlanetManager::GetVisiblePlanets(Coord inCoord, float distance)
         if (p.IsVisible(inCoord, distance))
         {
             picojson::object obj;
+
+            obj["ID"] = picojson::value((double)p.GetID());
+            obj["PlanetName"] = picojson::value(p.GetName());
+
             picojson::object position_obj;
             auto pos = p.GetPos();
             position_obj["x"] = picojson::value(pos.x);
             position_obj["y"] = picojson::value(pos.y);
-
-            obj["ID"] = picojson::value((double)p.GetID());
             obj["SpaceCoords"] = picojson::value(position_obj);
-            obj["PlanetName"] = picojson::value(p.GetName());
+
+
+            picojson::object temp_obj;
+            auto temp = p.GetTemperatureRange();
+            temp_obj["Min"] = picojson::value(temp.Min);
+            temp_obj["Max"] = picojson::value(temp.Max);
+            obj["Temperature"] = picojson::value(temp_obj);
+
+            picojson::object ph_obj;
+            auto ph = p.GetPhRange();
+            ph_obj["Min"] = picojson::value(temp.Min); 
+            ph_obj["Max"] = picojson::value(temp.Max);
+            obj["Ph"] = picojson::value(ph_obj);
+
             retVal.push_back(picojson::value(obj));
         }
     }

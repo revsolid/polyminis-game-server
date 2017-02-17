@@ -29,7 +29,7 @@ namespace PolyminisServer
         
         std::string UserName;
 
-        float       BiomassAvailable;
+        float       BiomassAvailable = 100.0f;
 
         Coord       Position; 
 
