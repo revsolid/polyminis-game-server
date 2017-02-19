@@ -9,7 +9,9 @@ namespace SpeciesCatalogue
     public:
         SpeciesCatalogueService(PolyminisServer::WSServer& server,
                                 PolyminisServer::ServerCfg almanacServerCfg);
-        picojson::object SpeciesCatalogueEndpoint(picojson::value& command);
+        picojson::object SpeciesCatalogueEndpoint(picojson::value& command, PolyminisServer::SessionData& sd);
+        bool GetSpeciesDateonDB();
+        bool SaveInventoryOnDB(const std::string& userName);
 
     private:
         // Members

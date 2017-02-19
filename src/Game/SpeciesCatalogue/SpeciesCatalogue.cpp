@@ -63,6 +63,17 @@ namespace SpeciesCatalogue
         return true;
     }
 
+    bool SpeciesCatalogueSession::AddSplice(Splice &inSplice)
+    {
+        if(getSpliceFromList(inSplice.mInternalName) == nullptr)
+        {
+           mSplices.push_back(inSplice);
+           return true;
+        }
+        return false;
+    }
+
+
     std::shared_ptr<Species> SpeciesCatalogueSession::getSpeciesFromList(std::string &name)
     {
         for(Species s : mSpecies)
@@ -87,4 +98,70 @@ namespace SpeciesCatalogue
         return nullptr;
     }
 
+    picojson::array SpeciesCatalogueSession::GetSpeciesJsonArray()
+    {
+        picojson::array retVal;
+
+        for (auto s : mSpecies)
+        {
+            retVal.push_back(picojson::value(s.GetJsonObject()));
+        }
+
+        return retVal;
+    }
+
+    std::vector<Species> SpeciesCatalogueSession::GetSpecies()
+    {
+        return mSpecies;
+    }
+
+
+    // get slice inside the species, if not found, return null
+    std::shared_ptr<Splice> Species::GetSplice(const std::string &internalName)
+    {
+        for(std::shared_ptr<Splice> s : mSplices)
+        {
+            if(s->mInternalName == internalName)
+            {
+                return s;
+            }
+        }
+        return nullptr;
+    }
+
+    // return true if did add, false if it's already there so no add
+    bool Species::AddSplice(std::shared_ptr<Splice> pSplice)
+    {
+        for(std::shared_ptr<Splice> s : mSplices)
+        {
+            if(s == pSplice)
+            {
+                return false;
+            }
+        }
+        mSplices.push_back(pSplice);
+        return true;
+    }
+
+    // return the species as a json object, with species name and 
+    // internal names for each splice.
+    picojson::object Species::GetJsonObject()
+    {
+        picojson::object obj;
+        picojson::array spliceArray;
+
+        obj["Name"] = picojson::value(mName);
+        for(auto splice : mSplices)
+        {
+            picojson::object spliceObj;
+            spliceObj["InternalName"] = picojson::value(splice->mInternalName);
+            spliceArray.push_back(picojson::value(spliceObj));
+        }
+        obj["Splices"] = picojson::value(spliceArray);
+
+        return obj;
+    }
+
 }
+
+

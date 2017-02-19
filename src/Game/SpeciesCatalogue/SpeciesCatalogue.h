@@ -19,32 +19,15 @@ namespace SpeciesCatalogue
         std::string mName;
         std::vector<std::shared_ptr<Splice>> mSplices;
 
-        // get slice inside the species, if not found, return null
-        std::shared_ptr<Splice> GetSplice(const std::string &internalName)
-        {
-            for(std::shared_ptr<Splice> s : mSplices)
-            {
-                if(s->mInternalName == internalName)
-                {
-                    return s;
-                }
-            }
-            return nullptr;
-        }
+        // get slice inside the species, if not found, return null.
+        std::shared_ptr<Splice> GetSplice(const std::string &internalName);
 
-        // return true if did add, false if it's already there so no add
-        bool AddSplice(std::shared_ptr<Splice> pSplice)
-        {
-            for(std::shared_ptr<Splice> s : mSplices)
-            {
-                if(s == pSplice)
-                {
-                    return false;
-                }
-            }
-            mSplices.push_back(pSplice);
-            return true;
-        }
+        // return true if did add, false if it's already there so no add.
+        bool AddSplice(std::shared_ptr<Splice> pSplice);
+
+        // return the species as a json object, with species name and 
+        // internal names for each splice.
+        picojson::object GetJsonObject();
     };
 
     // keeps track of species the current user has
@@ -60,7 +43,12 @@ namespace SpeciesCatalogue
         // overwrite the map with it, and return true so stuff can
         // be pushed to almanac.
         bool AttemptSaveSpecies( picojson::array &speciesArray );
+        
+        bool AddSplice(Splice &inSplice);
+    
+        std::vector<Species> GetSpecies();
 
+        picojson::array GetSpeciesJsonArray();
 
 
     private:
