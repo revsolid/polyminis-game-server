@@ -137,7 +137,7 @@ namespace SpaceExploration
                 sd.Position = destPoint;
                 to_ret["PositionSaved"] = picojson::value(SavePositionOnDB(destPoint, sd.UserName));
                 sd.BiomassAvailable -= warpCost;
-                to_ret["NewBiomassAvailable"] = picojson::value(warpCost); 
+                to_ret["NewBiomassAvailable"] = picojson::value(sd.BiomassAvailable); 
             }
             else
             {
