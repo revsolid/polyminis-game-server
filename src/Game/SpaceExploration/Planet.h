@@ -1,6 +1,19 @@
 #pragma once
 #include "Core/Types.h"
+#include "Core/JsonHelpers.h"
 #include <string>
+#include <vector>
+
+
+
+struct SpeciesSummary
+{
+    float Percentage = 0.0f;
+    std::string Name = "Test Species";
+    std::string CreatorName = "Chronos";
+
+    static SpeciesSummary FromJson(picojson::value& json);
+};
 
 //Individual planet data for planets in exploration
 // TODO: this class should reflect PlanetModel from the client
@@ -16,6 +29,10 @@ public:
     Range<float> GetTemperatureRange() const;
     Range<float> GetPhRange() const;
 
+    std::vector<SpeciesSummary> GetSpeciesInPlanet();
+    void AddSpecies(SpeciesSummary&& species);
+
+
     // Pass in a position and check if it's visible. Right now it just calculates 
     // euclidean distance but later we can do optimization
     bool IsVisible(Coord viewPoint, float visibleDistance);
@@ -25,4 +42,5 @@ private:
     Range<float> mTemperature;
     Range<float> mPh;
     std::string       mName;
+    std::vector<SpeciesSummary>  mSpecies;
 };

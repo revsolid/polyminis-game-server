@@ -1,4 +1,16 @@
 #include "Planet.h"
+#include "Core/JsonHelpers.h"
+
+
+
+SpeciesSummary SpeciesSummary::FromJson(picojson::value& json)
+{
+    SpeciesSummary ss;
+    ss.Percentage  = JsonHelpers::json_get_float(json, "Percentage");
+    ss.Name = JsonHelpers::json_get_string(json, "Name");
+    ss.CreatorName = JsonHelpers::json_get_string(json, "Creator");
+    return ss;
+}
 
 Planet::Planet(float x, float y, int inID):
     mID(inID)
@@ -29,4 +41,14 @@ bool Planet::IsVisible(Coord viewPoint, float visibleDistance)
     {
         return false;
     }
+}
+
+std::vector<SpeciesSummary> Planet::GetSpeciesInPlanet()
+{
+    return mSpecies;
+}
+
+void Planet::AddSpecies(SpeciesSummary&& species)
+{
+    mSpecies.push_back(species);
 }

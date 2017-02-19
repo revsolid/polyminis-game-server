@@ -1,6 +1,7 @@
 #include "SpaceExplorationService.h"
 #include "Core/JsonHelpers.h"
 #include "Core/HttpClient.h"
+#include "Game/GameUtils.h"
 
 namespace SpaceExploration
 {
@@ -37,7 +38,8 @@ namespace SpaceExploration
             {
                 float x   = 0.0f;
                 float y   = 0.0f;
-                int   pid = 1;
+                int   pid = mPlanetManager.GetNextPlanetId();
+                int   epoch = 0;
 
                 float t_min = 0.0f;
                 float t_max = 0.0f;
@@ -72,15 +74,40 @@ namespace SpaceExploration
                     ph_max = JsonHelpers::json_get_float(ph_json, "Max");
                 }
 
+                if (JsonHelpers::json_has_field(planet, "Epoch"))
+                {
+                    epoch = JsonHelpers::json_get_int(planet, "Epoch");
+                }
+
                 if (JsonHelpers::json_has_field(planet, "PlanetName"))
                 {
                     name = JsonHelpers::json_get_string(planet, "PlanetName");
                 }
 
+                picojson::object species_in_planet_resp = PolyminisServer::HttpClient::Request(mAlmanacServerCfg.host,
+                                                                                               mAlmanacServerCfg.port,
+                                                                                               "/persistence/speciessummaries/"+std::to_string(pid)+std::to_string(epoch),
+                                                                                               PolyminisServer::HttpMethod::GET,
+                                                                                               picojson::object());
+
+                auto species_in_planet_resp_v = picojson::value(species_in_planet_resp);
+                auto species_in_planet = JsonHelpers::json_get_object(species_in_planet_resp_v, "Response");
+                auto species_in_planet_value = picojson::value(species_in_planet);
+                picojson::array all_species_in_planet =  JsonHelpers::json_get_array(species_in_planet_value, "Items");
+
                 std::cout << "  Adding Planet " << name << " with: " << pid << " at: (" << x << "," << y << ")" << std::endl;
                 std::cout << "    Temperature [" << t_min << "," << t_max << "]" << std::endl;
                 std::cout << "    Ph          [" << ph_min << "," << ph_max << "]" << std::endl;
-                mPlanetManager.AddPlanet(Planet(x, y, pid, t_min, t_max, ph_min, ph_max, name));
+                std::cout << "    With "<< all_species_in_planet.size() << " Species: " << std::endl;
+
+                Planet planetModel(x, y, pid, t_min, t_max, ph_min, ph_max, name);
+                for (auto summary : all_species_in_planet)
+                {
+                    SpeciesSummary ss = SpeciesSummary::FromJson(summary);
+                    std::cout << "      Species: " << ss.Name << " [" << ss.Percentage << "]" << std::endl;
+                    planetModel.AddSpecies(std::move(ss));
+                } 
+                mPlanetManager.AddPlanet(planetModel);
             }
         }
         catch (websocketpp::exception const & e)
@@ -138,6 +165,8 @@ namespace SpaceExploration
                 to_ret["PositionSaved"] = picojson::value(SavePositionOnDB(destPoint, sd.UserName));
                 sd.BiomassAvailable -= warpCost;
                 to_ret["NewBiomassAvailable"] = picojson::value(sd.BiomassAvailable); 
+
+                GameUtils::SaveBiomassValue(sd, mAlmanacServerCfg);
             }
             else
             {
@@ -195,7 +224,7 @@ namespace SpaceExploration
             pos["x"] = picojson::value(inPos.x);
             pos["y"] = picojson::value(inPos.y);
             lkpPayload["LastKnownPosition"] = picojson::value(pos);
-            PolyminisServer::HttpClient::Request(mAlmanacServerCfg.host, mAlmanacServerCfg.port, "/persistence/users/"+userName,
+            PolyminisServer::HttpClient::Request(mAlmanacServerCfg.host, mAlmanacServerCfg.port, "/persistence/users/"+userName+"/",
                                                  PolyminisServer::HttpMethod::PUT, lkpPayload);
         }
         catch (websocketpp::exception const & e)
