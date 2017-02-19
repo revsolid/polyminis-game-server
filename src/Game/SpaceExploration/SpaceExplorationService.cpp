@@ -149,7 +149,7 @@ namespace SpaceExploration
                 sd.Position = Coord { x, y };
             }
         }
-        else if (command == "WARP")
+        else if (command == "ATTEMPT_WARP")
         {
             Coord destPoint {x, y};
             //destPoint.x = x;
