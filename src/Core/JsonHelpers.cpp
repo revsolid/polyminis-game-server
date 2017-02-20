@@ -1,6 +1,8 @@
 #include "JsonHelpers.h"
 namespace JsonHelpers
 {
+    const picojson::object Empty = picojson::object();
+    const picojson::array  EmptyArray = picojson::array();
     // TODO: I think this should be done with templates, but those things scare the shit out of me
     std::string json_get_string(const picojson::value& v, const std::string& fieldname)
     {
@@ -73,7 +75,7 @@ namespace JsonHelpers
         {
             // ERROR
             std::cout << "Error value is not an object (json_get_object)" << std::endl;
-            return std::move(picojson::object());
+            return Empty;
         }
         // obtain a const reference to the map
         const picojson::value::object& obj = v.get<picojson::object>();
@@ -82,9 +84,12 @@ namespace JsonHelpers
         {
            // ERROR 
            std::cout << "Error field: "<< fieldname << " not found" << std::endl;
-           return std::move(picojson::object());
+           return Empty;
         }
-        return it->second.get<picojson::object>();
+        else
+        {
+            return it->second.get<picojson::object>();
+        }
     }
 
     const picojson::object& json_get_as_object(const picojson::value& v)
@@ -93,7 +98,7 @@ namespace JsonHelpers
         {
             // ERROR
             std::cout << "Error value is not an object (json_get_object)" << std::endl;
-            return std::move(picojson::object());
+            return Empty;
         }
         return v.get<picojson::object>();
     }
@@ -104,7 +109,7 @@ namespace JsonHelpers
         {
             // ERROR
             std::cout << "Error value is not an object (json_get_array)" << std::endl;
-            return std::move(picojson::array());
+            return EmptyArray;
         }
         // obtain a const reference to the map
         const picojson::value::object& obj = v.get<picojson::object>();
@@ -113,7 +118,7 @@ namespace JsonHelpers
         {
             // ERROR 
             std::cout << "Error field: "<< fieldname << " not found" << std::endl;
-            return std::move(picojson::array());
+            return EmptyArray;
         }
         return it->second.get<picojson::array>();
     }

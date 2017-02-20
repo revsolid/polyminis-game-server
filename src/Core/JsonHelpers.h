@@ -2,6 +2,8 @@
 #include <picojson.h>
 namespace JsonHelpers
 {
+    const extern picojson::object Empty;
+    const extern picojson::array  EmptyArray;
     std::string json_get_string(const picojson::value& v, const std::string& fieldname);
     float json_get_float(const picojson::value& v, const std::string& fieldname);
     int json_get_int(const picojson::value& v, const std::string& fieldname);
