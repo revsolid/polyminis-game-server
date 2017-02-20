@@ -224,7 +224,7 @@ namespace SpaceExploration
             pos["x"] = picojson::value(inPos.x);
             pos["y"] = picojson::value(inPos.y);
             lkpPayload["LastKnownPosition"] = picojson::value(pos);
-            PolyminisServer::HttpClient::Request(mAlmanacServerCfg.host, mAlmanacServerCfg.port, "/persistence/users/"+userName+"/",
+            PolyminisServer::HttpClient::Request(mAlmanacServerCfg.host, mAlmanacServerCfg.port, "/persistence/users/"+userName,
                                                  PolyminisServer::HttpMethod::PUT, lkpPayload);
         }
         catch (websocketpp::exception const & e)

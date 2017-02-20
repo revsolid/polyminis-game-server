@@ -30,10 +30,8 @@ namespace PolyminisServer
         std::string UserName;
 
         float       BiomassAvailable = 100.0f;
-
-        Coord       Position; 
-
         float       VisibilityRange = 600.0f;
+        Coord       Position; 
     };
     
 

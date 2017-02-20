@@ -80,6 +80,16 @@ picojson::array PlanetManager::GetVisiblePlanets(Coord inCoord, float distance)
             ph_obj["Max"] = picojson::value(temp.Max);
             obj["Ph"] = picojson::value(ph_obj);
 
+            picojson::array species_arr;
+            for (auto s : p.GetSpeciesInPlanet())
+            {
+                picojson::object species_obj;
+                species_obj["Name"] = picojson::value(s.Name);
+                species_arr.push_back(picojson::value(species_obj));
+            }
+            
+            obj["Species"] = picojson::value(species_arr);
+
             retVal.push_back(picojson::value(obj));
         }
     }

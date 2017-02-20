@@ -7,8 +7,8 @@ SpeciesSummary SpeciesSummary::FromJson(picojson::value& json)
 {
     SpeciesSummary ss;
     ss.Percentage  = JsonHelpers::json_get_float(json, "Percentage");
-    ss.Name = JsonHelpers::json_get_string(json, "Name");
-    ss.CreatorName = JsonHelpers::json_get_string(json, "Creator");
+    ss.Name = JsonHelpers::json_get_string(json, "SpeciesName");
+    ss.CreatorName = JsonHelpers::json_get_string(json, "CreatorName");
     return ss;
 }
 
@@ -43,7 +43,7 @@ bool Planet::IsVisible(Coord viewPoint, float visibleDistance)
     }
 }
 
-std::vector<SpeciesSummary> Planet::GetSpeciesInPlanet()
+std::vector<SpeciesSummary>& Planet::GetSpeciesInPlanet()
 {
     return mSpecies;
 }

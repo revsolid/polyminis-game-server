@@ -2,7 +2,7 @@
 namespace JsonHelpers
 {
     // TODO: I think this should be done with templates, but those things scare the shit out of me
-    std::string json_get_string(picojson::value& v, const std::string& fieldname)
+    std::string json_get_string(const picojson::value& v, const std::string& fieldname)
     {
         //check if the type of the value is "object"
         if (! v.is<picojson::object>())
@@ -25,7 +25,7 @@ namespace JsonHelpers
         return it->second.to_str();
     }
 
-    float json_get_float(picojson::value& v, const std::string& fieldname)
+    float json_get_float(const picojson::value& v, const std::string& fieldname)
     {
         //check if the type of the value is "object"
         if (! v.is<picojson::object>())
@@ -46,7 +46,7 @@ namespace JsonHelpers
         return (float) it->second.get<double>();
     }
 
-    int json_get_int(picojson::value& v, const std::string& fieldname)
+    int json_get_int(const picojson::value& v, const std::string& fieldname)
     {
         //check if the type of the value is "object"
         if (! v.is<picojson::object>())
@@ -67,7 +67,7 @@ namespace JsonHelpers
         return (int)it->second.get<double>();
     }
 
-    const picojson::object& json_get_object(picojson::value& v, const std::string& fieldname)
+    const picojson::object& json_get_object(const picojson::value& v, const std::string& fieldname)
     {
         if (! v.is<picojson::object>())
         {
@@ -87,7 +87,7 @@ namespace JsonHelpers
         return it->second.get<picojson::object>();
     }
 
-    const picojson::object& json_get_as_object(picojson::value& v)
+    const picojson::object& json_get_as_object(const picojson::value& v)
     {
         if (! v.is<picojson::object>())
         {
@@ -98,7 +98,7 @@ namespace JsonHelpers
         return v.get<picojson::object>();
     }
 
-    const picojson::array& json_get_array(picojson::value& v, const std::string& fieldname)
+    const picojson::array& json_get_array(const picojson::value& v, const std::string& fieldname)
     {
         if (! v.is<picojson::object>())
         {
@@ -118,7 +118,7 @@ namespace JsonHelpers
         return it->second.get<picojson::array>();
     }
 
-    bool json_has_field(picojson::value& v, const std::string& fieldname)
+    bool json_has_field(const picojson::value& v, const std::string& fieldname)
     {
         if (! v.is<picojson::object>())
         {

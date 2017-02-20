@@ -1,8 +1,8 @@
 FILE(GLOB SRC
     "CreatureObservation/*.h"
     "CreatureObservation/*.cpp"
-    "SpeciesCatalogue/*.h"
-    "SpeciesCatalogue/*.cpp"
+    "Inventory/*.h"
+    "Inventory/*.cpp"
     "SpaceExploration/*.h"
     "SpaceExploration/*.cpp"
     "User/*.h"

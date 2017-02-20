@@ -60,7 +60,7 @@ namespace SpeciesCatalogue
             }
             else
             {
-                std::cout << "Failted saving to game server" << std::endl;
+                std::cout << "Failed saving to game server" << std::endl;
             }
 
             //std::cout << "SAVE_SPECIES command Received!" << std::endl;

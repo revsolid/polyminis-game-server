@@ -1,0 +1,173 @@
+#include "InventoryService.h"
+#include "Core/JsonHelpers.h"
+#include "Core/HttpClient.h"
+#include <time.h>
+
+namespace Inventory
+{
+    InventoryService::InventoryService(PolyminisServer::WSServer& server,
+                                       PolyminisServer::ServerCfg almanacServerCfg) : mAlmanacServerCfg(almanacServerCfg)
+    {
+        auto wss = std::make_shared<PolyminisServer::WSService>();
+        wss->mServiceName = "inventory";
+        wss->mHandler =  [=] (picojson::value& request, PolyminisServer::SessionData& sd)
+        {
+            return this->InventoryEndpoint(request, sd);
+        };
+        server.AddService(wss);
+    }
+
+    picojson::object InventoryService::InventoryEndpoint(picojson::value& request, PolyminisServer::SessionData& sd)
+    {
+        std::string command = JsonHelpers::json_get_string(request, "Command");
+        auto payload = JsonHelpers::json_get_as_object(request);
+
+
+        if (payload.count("Slot") == 0)
+        {
+            return JsonHelpers::json_create_error("Error - Slot not sent");
+        }
+        int slot  = JsonHelpers::json_get_int(request, "Slot");
+
+        picojson::object toRet;
+
+        toRet["Service"] = picojson::value("inventory");
+        if (command == "SAMPLE_FROM_PLANET" || command == "RESEARCH" || command == "NEW_SPECIES")
+        {
+            picojson::object invPayload;
+            picojson::object invEntry;
+
+            bool new_species = command == "NEW_SPECIES";
+
+            // TODO: Shit load of anti-cheat stuff should happen here 
+            // For now, we pray no one cheats xD
+            //
+            // Anti-cheat / validation (TODO)
+
+            int epoch = 0;
+            int pid = 0;
+
+            if (payload.count("Species") == 0)
+            {
+                    return JsonHelpers::json_create_error("Error - PlanetId not sent");
+            }
+
+            picojson::value speciesData = picojson::value(JsonHelpers::json_get_object(request, "Species"));
+            std::string speciesName = JsonHelpers::json_get_string(speciesData, "Name");
+
+            if (!new_species)
+            {
+                if (payload.count("PlanetId") == 0)
+                {
+                    return JsonHelpers::json_create_error("Error - PlanetId not sent");
+                }
+                if (payload.count("Epoch") == 0)
+                {
+                    return JsonHelpers::json_create_error("Error - Epoch not sent");
+                }
+
+                epoch = JsonHelpers::json_get_int(request, "Epoch");
+                pid   = JsonHelpers::json_get_int(request, "PlanetId");
+            }
+
+            if (command == "RESEARCH")
+            {
+                invEntry["Type"] = picojson::value("Research");
+                invEntry["Value"] = picojson::value(CreateResearchPayload(pid, epoch, speciesName));
+            }  
+            else if (command == "SAMPLE_FROM_PLANET" || command == "NEW_SPECIES")
+            {
+                invEntry["Type"] = picojson::value("SpeciesSeed");
+                invEntry["Value"] = picojson::value(CreateSpeciesSeedPayload(speciesData, pid, epoch, speciesName, new_species, sd));
+            }
+
+            invPayload["UserName"] = picojson::value(sd.UserName);
+            invPayload["Slot"] = picojson::value((double)slot);
+            invPayload["InventoryEntry"] = picojson::value(invEntry);
+            
+            PolyminisServer::HttpClient::Request(mAlmanacServerCfg.host, mAlmanacServerCfg.port, "/persistence/inventoryentries/"+sd.UserName+"/"+std::to_string(slot),
+                                                 PolyminisServer::HttpMethod::POST, invPayload);
+        }
+        else if (command == "GET_INVENTORY")
+        {
+
+            picojson::object entries_resp = PolyminisServer::HttpClient::Request(mAlmanacServerCfg.host, mAlmanacServerCfg.port, "/persistence/inventoryentries/"+sd.UserName,
+                                                                                 PolyminisServer::HttpMethod::GET, picojson::object());
+
+            auto entries_resp_v = picojson::value(entries_resp);
+            auto entries = JsonHelpers::json_get_object(entries_resp_v, "Response");
+            auto entries_value = picojson::value(entries);
+
+            //TODO: We should check for any Research that is done by now 
+            
+            toRet["EventString"] = picojson::value("InventoryUpdate");
+            toRet["InventoryEntries"] = picojson::value(JsonHelpers::json_get_array(entries_value, "Items"));
+
+        }
+        else if (command == "DISCARD_ENTRY")
+        {
+            // Delete inventory Entry
+            PolyminisServer::HttpClient::Request(mAlmanacServerCfg.host, mAlmanacServerCfg.port, "/persistence/inventoryentries/"+sd.UserName+"/"+std::to_string(slot),
+                                                 PolyminisServer::HttpMethod::DELETE, picojson::object());
+        }
+        else
+        {
+            return JsonHelpers::json_create_error("Error - Command Not Found");
+        }
+
+        return std::move(toRet);
+    }
+
+    picojson::object InventoryService::CreateResearchPayload(int pid, int epoch, const std::string& speciesName)
+    {
+// TODO: GAME_RULES - Tagging al places that have Game rules implemented for later tracking 
+// Hardcoding it to something now, it should take into account a bunch of factors like player level
+#define RESEARCH_TIME 60 
+        picojson::object payload;
+
+        payload["PlanetEpoch"] = picojson::value(std::to_string(pid) + std::to_string(epoch));
+        payload["ResearchedSpeciesName"] = picojson::value(speciesName);
+
+        //
+        // The idea is that research takes a slot for some amount of time
+        payload["Done"] = picojson::value((double)std::time(0) + RESEARCH_TIME);
+        
+        return std::move(payload);
+    }
+
+    picojson::object InventoryService::CreateSpeciesSeedPayload(const picojson::value& speciesData, int pid, int epoch, const std::string& pSpeciesName, bool isNew,
+                                                                const PolyminisServer::SessionData& sd)
+    {
+// TODO: GAME_RULES - Tagging al places that have Game rules implemented for later tracking 
+//
+// A Species Seed is the Translation Table + User Tunning (Instincts and GAParams) + A pointer to the Individuals of an original Species
+// this is to avoid duplication and manipulation of Individuals (The biggest payload in the system)
+// Once a creature is deployed (Copied into the SpeciesInPlanet Table, the Individuals Row is copied from the original Species)
+// New creatures are seeded with 1 of few 'prebaked' creatures
+        std::string speciesName = pSpeciesName;
+        std::string originalSpeciesName = speciesName;
+
+        picojson::object payload;
+
+        if (isNew)
+        {  
+            // Hardcoded a specific species
+            pid = 1414;
+            epoch = 100;
+            speciesName = JsonHelpers::json_get_string(speciesData, "Name");
+            originalSpeciesName = "Test Species 1A";
+            payload["CreatorName"] = picojson::value(sd.UserName);
+        }
+
+        payload["PlanetEpoch"] = picojson::value(std::to_string(pid) + std::to_string(epoch));
+        payload["OriginalSpeciesName"] = picojson::value(originalSpeciesName);
+        if (JsonHelpers::json_has_field(speciesData, "GAConfiguration"))
+        {
+            payload["GAConfiguration"] = picojson::value(JsonHelpers::json_get_object(speciesData, "GAConfiguration"));
+        }
+    //    payload["InstinctTuning"] = picojson::value(JsonHelpers::json_get_object(speciesData, "InstinctTuning"));
+        payload["TranslationTable"] = picojson::value(JsonHelpers::json_get_array(speciesData, "Splices"));
+
+        return std::move(payload);
+    }
+}

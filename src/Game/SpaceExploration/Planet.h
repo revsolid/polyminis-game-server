@@ -29,7 +29,7 @@ public:
     Range<float> GetTemperatureRange() const;
     Range<float> GetPhRange() const;
 
-    std::vector<SpeciesSummary> GetSpeciesInPlanet();
+    std::vector<SpeciesSummary>& GetSpeciesInPlanet();
     void AddSpecies(SpeciesSummary&& species);
 
 

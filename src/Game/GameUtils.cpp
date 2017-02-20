@@ -11,7 +11,7 @@ namespace GameUtils
             picojson::object bmPayload;
             bmPayload["Biomass"] = picojson::value(session.BiomassAvailable);
             PolyminisServer::HttpClient::Request(almanacServerCfg.host, almanacServerCfg.port,
-                                                "/persistence/users"+session.UserName+"/",
+                                                "/persistence/users/"+session.UserName,
                                                  PolyminisServer::HttpMethod::PUT, bmPayload);
             return true;
 

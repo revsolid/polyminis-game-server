@@ -32,10 +32,10 @@ namespace SpaceExploration
                 // TO EXTRACT: We update the proportion of the species in the DB and
                 // update the Biomass of the player on the DB - To find the species we need
                 // to extend the almanac to support an extra query param on get
-                float toExtract = JsonHelpers::json_get_float(request, "ExtractedBiomass");
+                float percentageChange = JsonHelpers::json_get_float(request, "ExtractedPopulation");
                 int   pid = JsonHelpers::json_get_int(request, "PlanetId");
                 int   epoch = JsonHelpers::json_get_int(request, "Epoch");
-                float percentageChange = BiomassToPopulationPercentage(toExtract);
+                float toExtract = PopulationPercentageToBiomass(toExtract);
 
                 std::string speciesName = JsonHelpers::json_get_string(request, "SpeciesName");
 
@@ -43,7 +43,7 @@ namespace SpaceExploration
                 try
                 {
 
-                    std::string url = "/persistence/species_summaries/"+std::to_string(pid)+""+std::to_string(epoch)+"/"+speciesName+"/";
+                    std::string url = "/persistence/speciessummaries/"+std::to_string(pid)+""+std::to_string(epoch)+"/"+speciesName;
                     picojson::object response = PolyminisServer::HttpClient::Request(mAlmanacServerCfg.host, mAlmanacServerCfg.port, url,
                                                                                      PolyminisServer::HttpMethod::GET, picojson::object());
 
@@ -55,41 +55,96 @@ namespace SpaceExploration
 
                     picojson::object xtractPayload;
 
-
                     if (oldPercentage < percentageChange)
                     {
                         // Error
                         std::cout << "Trying to substract more percentage than there is: " << oldPercentage << " - " << percentageChange << std::endl;
-                        return picojson::object();
+                        return JsonHelpers::json_create_error("Error - Trying to Substarct more Percentage than available");
                     }
 
                     xtractPayload["Percentage"] = picojson::value(oldPercentage - percentageChange);
-
                     PolyminisServer::HttpClient::Request(mAlmanacServerCfg.host, mAlmanacServerCfg.port, url,
                                                          PolyminisServer::HttpMethod::PUT, xtractPayload);
                     sd.BiomassAvailable += toExtract; 
 
                     GameUtils::SaveBiomassValue(sd, mAlmanacServerCfg); 
+                    toRet["EventString"] = picojson::value("ExtractResult");
+                    toRet["NewBiomassAvialble"] = picojson::value(sd.BiomassAvailable);
                 }
                 catch (websocketpp::exception const & e)
                 {
                     std::cout << e.what() << std::endl;
+                    return JsonHelpers::json_create_error("Error - Http Or WebSocket Error");
                 }
             }
-            else if (command == "RESEARCH") 
+            else if (command == "EDIT_IN_PLANET")
             {
-                // TO RESEARCH: Add an inventory entry with a Research entry (PID+EPOCH, NAME) and a Timestamp
-            }
-            else if (command == "SAMPLE") 
-            {
-                // TO SAMPLE: Add an inventory entry with the translation table of the species and a pointer (PID+EPOCH, NAME) to it
             }
             else if (command == "DEPLOY") 
             {
-                // TO DEPLOY: Insert the species in the planet in epoch + 1 with the proportion based on the invested Biomass.
-                // Copy the species in epoch to epoch+1 with the new proportions.
-            }
+// TODO: GAME_RULES - Tagging al places that have Game rules implemented for later tracking 
+                // TO DEPLOY: Insert the species in the planet in epoch with the proportion based on the invested Biomass.
+                //
+                //
+                // Get All Species in PlanetEpoch
+                // Substract Percentage from them
+                // Add new species with percentage
+                float toDeploy = JsonHelpers::json_get_float(request, "DeployedBiomass");
+                int   pid = JsonHelpers::json_get_int(request, "PlanetId");
+                int   epoch = JsonHelpers::json_get_int(request, "Epoch");
+                std::string planetEpoch = std::to_string(pid)+std::to_string(epoch);
+                float percentageForDeployed = BiomassToPopulationPercentage(toDeploy);
+                std::string speciesName = JsonHelpers::json_get_string(request, "SpeciesName");
 
+                try
+                {
+                    std::string url = "/persistence/speciessummaries/"+planetEpoch;
+                    picojson::object response = PolyminisServer::HttpClient::Request(mAlmanacServerCfg.host, mAlmanacServerCfg.port, url,
+                                                                                     PolyminisServer::HttpMethod::GET, picojson::object());
+
+                    if (toDeploy > sd.BiomassAvailable)
+                    {
+                        // Error
+                        return JsonHelpers::json_create_error("Error - Trying to Deploy more Biomass than Available");
+                    }
+
+                    auto response_v = picojson::value(response);
+                    auto species_arr = JsonHelpers::json_get_array(picojson::value(JsonHelpers::json_get_object(response_v, "Response")), "Items");
+
+                    for (auto species_json : species_arr)
+                    {
+                        float oldPercentage = JsonHelpers::json_get_float(species_json, "Percentage");
+                        float newPercentage = oldPercentage -  (oldPercentage * percentageForDeployed);
+
+                        std::string sName = JsonHelpers::json_get_string(species_json, "SpeciesName");
+
+                        picojson::object xtractPayload;
+                        xtractPayload["Percentage"] = picojson::value(newPercentage);
+                        url = "/persistence/speciessummaries/"+planetEpoch+"/"+sName;
+                        PolyminisServer::HttpClient::Request(mAlmanacServerCfg.host, mAlmanacServerCfg.port, url,
+                                                             PolyminisServer::HttpMethod::PUT, xtractPayload);
+                    }
+
+                    sd.BiomassAvailable -= toDeploy;
+                    GameUtils::SaveBiomassValue(sd, mAlmanacServerCfg);
+                    toRet["EventString"] = picojson::value("DeployResult");
+                    toRet["NewBiomassAvialble"] = picojson::value(sd.BiomassAvailable);
+
+                    picojson::object newSpeciesPayload;
+                    newSpeciesPayload["Percentage"] = picojson::value(percentageForDeployed);
+                    newSpeciesPayload["PlanetEpoch"] = picojson::value(planetEpoch);
+                    newSpeciesPayload["SpeciesName"] = picojson::value(speciesName);
+                    url = "/persistence/speciessummaries/"+planetEpoch+"/"+speciesName;
+                    PolyminisServer::HttpClient::Request(mAlmanacServerCfg.host, mAlmanacServerCfg.port, url,
+                                                         PolyminisServer::HttpMethod::POST, newSpeciesPayload);
+
+                }
+                catch (websocketpp::exception const & e)
+                {
+                    std::cout << e.what() << std::endl;
+                    return JsonHelpers::json_create_error("Error - Http Or WebSocket Error");
+                }
+            }
             return toRet;
         }
 }
