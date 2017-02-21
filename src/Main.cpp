@@ -5,7 +5,9 @@
 #include "Game/SpaceExploration/SpaceExplorationService.h"
 #include "Game/SpaceExploration/PlanetManager.h"
 #include "Game/SpaceExploration/SpaceMap.h"
+#include "Game/SpaceExploration/OrbitalInteractionsService.h"
 #include "Game/CreatureObservation/CreatureObservationService.h"
+#include "Game/Inventory/InventoryService.h"
 #include "Game/User/UserService.h"
 
 int main()
@@ -22,12 +24,18 @@ int main()
         std::cout << "Adding Space Exploration..." << std::endl;
         SpaceExploration::SpaceExplorationService spaceEx(server, pManager, almanacServer);
 
+        std::cout << "Adding OrbitalInteractions Service..." << std::endl;
+        SpaceExploration::OrbitalInteractionsService orbitalInteractions(server, pManager, almanacServer);
+     
         std::cout << "Adding User Service..." << std::endl;
         User::UserService userService(server, almanacServer);
 
         CreatureObservation::SimulationServerConfig simServerCfg { std::string("localhost"), 8080 };
         std::cout << "Adding Creature Observation..." << std::endl;
         CreatureObservation::CreatureObservationService creatureObs(server, simServerCfg);
+
+        std::cout << "Adding Inventory Service..." << std::endl;
+        Inventory::InventoryService inventory(server, almanacServer);
 
         std::cout << "Starting Server..." << std::endl;
         server.RunServer();
