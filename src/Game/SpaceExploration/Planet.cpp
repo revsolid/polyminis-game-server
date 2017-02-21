@@ -9,6 +9,7 @@ SpeciesSummary SpeciesSummary::FromJson(picojson::value& json)
     ss.Percentage  = JsonHelpers::json_get_float(json, "Percentage");
     ss.Name = JsonHelpers::json_get_string(json, "SpeciesName");
     ss.CreatorName = JsonHelpers::json_get_string(json, "CreatorName");
+    ss.PlanetEpoch = JsonHelpers::json_get_string(json, "PlanetEpoch");
     return ss;
 }
 

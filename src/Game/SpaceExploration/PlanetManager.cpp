@@ -84,7 +84,9 @@ picojson::array PlanetManager::GetVisiblePlanets(Coord inCoord, float distance)
             for (auto s : p.GetSpeciesInPlanet())
             {
                 picojson::object species_obj;
-                species_obj["Name"] = picojson::value(s.Name);
+                species_obj["SpeciesName"] = picojson::value(s.Name);
+                species_obj["CreatorName"] = picojson::value(s.CreatorName);
+                species_obj["PlanetEpoch"] = picojson::value(s.PlanetEpoch);
                 species_arr.push_back(picojson::value(species_obj));
             }
             

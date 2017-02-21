@@ -11,6 +11,7 @@ struct SpeciesSummary
     float Percentage = 0.0f;
     std::string Name = "Test Species";
     std::string CreatorName = "Chronos";
+    std::string PlanetEpoch = "0000";
 
     static SpeciesSummary FromJson(picojson::value& json);
 };

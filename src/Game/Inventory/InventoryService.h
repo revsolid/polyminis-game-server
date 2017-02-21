@@ -15,7 +15,7 @@ namespace Inventory
         bool SaveInventoryEntryOnDB(const std::string& userName, int slot);
 
         picojson::object CreateResearchPayload(int pid, int epoch, const std::string& speciesName);
-        picojson::object CreateSpeciesSeedPayload(const picojson::value& speciesData, int pid, int epoch, const std::string& speciesName, bool isNew,
+        picojson::object CreateSpeciesSeedPayload(const picojson::value& speciesData, const std::string& planetEpoch, const std::string& speciesName, bool isNew,
                                                   const PolyminisServer::SessionData& sd);
 
         // Members

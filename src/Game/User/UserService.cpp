@@ -58,6 +58,12 @@ namespace User
             {
                 to_ret["LastKnownPosition"] =  result["LastKnownPosition"];
             }
+
+            if (result.count("InventorySlots") > 0)
+            {
+                to_ret["InventorySlots"] =  result["InventorySlots"];
+            }
+
         }
         catch (websocketpp::exception const & e)
         {
