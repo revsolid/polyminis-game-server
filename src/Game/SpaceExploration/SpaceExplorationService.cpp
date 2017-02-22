@@ -36,77 +36,19 @@ namespace SpaceExploration
             std::cout << "Adding planets to Planet Manager..." << std::endl;
             for (auto planet : all_planets)
             {
-                float x   = 0.0f;
-                float y   = 0.0f;
                 int   pid = mPlanetManager.GetNextPlanetId();
-                int   epoch = 0;
+                Planet planetModel(planet, pid);
 
-                float t_min = 0.0f;
-                float t_max = 0.0f;
-                float ph_min = 0.0f;
-                float ph_max = 0.0f;
-
-                std::string name = "Test Planet";
-                if (JsonHelpers::json_has_field(planet, "SpacePosition"))
-                {
-                    auto position_json = picojson::value(JsonHelpers::json_get_object(planet, "SpacePosition"));
-                    x = JsonHelpers::json_get_float(position_json, "x");
-                    y = JsonHelpers::json_get_float(position_json, "y");
-                }
-
-                if (JsonHelpers::json_has_field(planet, "PlanetId"))
-                {
-                    pid = JsonHelpers::json_get_int(planet, "PlanetId");
-                }
-
+                auto all_species_in_planet = GameUtils::GetSpeciesInPlanet(mAlmanacServerCfg,
+                                                                           std::to_string(planetModel.GetID())+std::to_string(planetModel.GetEpoch()));
                 
-                if (JsonHelpers::json_has_field(planet, "Temperature"))
-                {
-                    auto temp_json = picojson::value(JsonHelpers::json_get_object(planet, "Temperature"));
-                    t_min = JsonHelpers::json_get_float(temp_json, "Min");
-                    t_max = JsonHelpers::json_get_float(temp_json, "Max");
-                }
-
-                if (JsonHelpers::json_has_field(planet, "Ph"))
-                {
-                    auto ph_json = picojson::value(JsonHelpers::json_get_object(planet, "Ph"));
-                    ph_min = JsonHelpers::json_get_float(ph_json, "Min");
-                    ph_max = JsonHelpers::json_get_float(ph_json, "Max");
-                }
-
-                if (JsonHelpers::json_has_field(planet, "Epoch"))
-                {
-                    epoch = JsonHelpers::json_get_int(planet, "Epoch");
-                }
-
-                if (JsonHelpers::json_has_field(planet, "PlanetName"))
-                {
-                    name = JsonHelpers::json_get_string(planet, "PlanetName");
-                }
-
-                picojson::object species_in_planet_resp = PolyminisServer::HttpClient::Request(mAlmanacServerCfg.host,
-                                                                                               mAlmanacServerCfg.port,
-                                                                                               "/persistence/speciessummaries/"+std::to_string(pid)+std::to_string(epoch),
-                                                                                               PolyminisServer::HttpMethod::GET,
-                                                                                               picojson::object());
-
-                auto species_in_planet_resp_v = picojson::value(species_in_planet_resp);
-                auto species_in_planet = JsonHelpers::json_get_object(species_in_planet_resp_v, "Response");
-                auto species_in_planet_value = picojson::value(species_in_planet);
-                picojson::array all_species_in_planet =  JsonHelpers::json_get_array(species_in_planet_value, "Items");
-
-                std::cout << "  Adding Planet " << name << " with: " << pid << " at: (" << x << "," << y << ")" << std::endl;
-                std::cout << "    Temperature [" << t_min << "," << t_max << "]" << std::endl;
-                std::cout << "    Ph          [" << ph_min << "," << ph_max << "]" << std::endl;
-                std::cout << "    With "<< all_species_in_planet.size() << " Species: " << std::endl;
-
-                Planet planetModel(x, y, pid, t_min, t_max, ph_min, ph_max, name);
                 for (auto summary : all_species_in_planet)
                 {
                     SpeciesSummary ss = SpeciesSummary::FromJson(summary);
                     std::cout << "      Species: " << ss.Name << " [" << ss.Percentage << "]" << std::endl;
                     planetModel.AddSpecies(std::move(ss));
                 } 
+
                 mPlanetManager.AddPlanet(planetModel);
             }
         }

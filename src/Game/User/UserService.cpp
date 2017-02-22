@@ -64,6 +64,11 @@ namespace User
                 to_ret["InventorySlots"] =  result["InventorySlots"];
             }
 
+            if (result.count("Biomass"))
+            {
+                to_ret["Biomass"] = result["Biomass"];
+            }
+
         }
         catch (websocketpp::exception const & e)
         {

@@ -56,43 +56,7 @@ picojson::array PlanetManager::GetVisiblePlanets(Coord inCoord, float distance)
     {
         if (p.IsVisible(inCoord, distance))
         {
-            picojson::object obj;
-
-            obj["ID"] = picojson::value((double)p.GetID());
-            obj["PlanetName"] = picojson::value(p.GetName());
-
-            picojson::object position_obj;
-            auto pos = p.GetPos();
-            position_obj["x"] = picojson::value(pos.x);
-            position_obj["y"] = picojson::value(pos.y);
-            obj["SpaceCoords"] = picojson::value(position_obj);
-
-
-            picojson::object temp_obj;
-            auto temp = p.GetTemperatureRange();
-            temp_obj["Min"] = picojson::value(temp.Min);
-            temp_obj["Max"] = picojson::value(temp.Max);
-            obj["Temperature"] = picojson::value(temp_obj);
-
-            picojson::object ph_obj;
-            auto ph = p.GetPhRange();
-            ph_obj["Min"] = picojson::value(temp.Min); 
-            ph_obj["Max"] = picojson::value(temp.Max);
-            obj["Ph"] = picojson::value(ph_obj);
-
-            picojson::array species_arr;
-            for (auto s : p.GetSpeciesInPlanet())
-            {
-                picojson::object species_obj;
-                species_obj["SpeciesName"] = picojson::value(s.Name);
-                species_obj["CreatorName"] = picojson::value(s.CreatorName);
-                species_obj["PlanetEpoch"] = picojson::value(s.PlanetEpoch);
-                species_arr.push_back(picojson::value(species_obj));
-            }
-            
-            obj["Species"] = picojson::value(species_arr);
-
-            retVal.push_back(picojson::value(obj));
+            retVal.push_back(picojson::value(p.ToJson()));
         }
     }
 

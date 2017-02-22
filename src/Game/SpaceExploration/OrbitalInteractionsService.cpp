@@ -9,7 +9,7 @@ namespace SpaceExploration
 {
 
         OrbitalInteractionsService::OrbitalInteractionsService(PolyminisServer::WSServer& server, PlanetManager& pManager,
-                                                               PolyminisServer::ServerCfg almanacServerCfg) : mAlmanacServerCfg(almanacServerCfg) 
+                                                               PolyminisServer::ServerCfg almanacServerCfg) : mAlmanacServerCfg(almanacServerCfg), mPlanetManager(pManager)
         {
             auto wss = std::make_shared<PolyminisServer::WSService>();
             wss->mServiceName = "orbital_interactions";
@@ -27,17 +27,21 @@ namespace SpaceExploration
             picojson::object toRet;
             toRet["Service"] = picojson::value("orbital_interactions");
 
+            int  pid = JsonHelpers::json_get_int(request, "PlanetId");
+            int  epoch = JsonHelpers::json_get_int(request, "Epoch");
+            std::string planetEpoch = std::to_string(pid)+std::to_string(epoch);
+            bool reloadPlanet = false;
+
             if (command == "EXTRACT") 
             {
                 // TO EXTRACT: We update the proportion of the species in the DB and
                 // update the Biomass of the player on the DB - To find the species we need
                 // to extend the almanac to support an extra query param on get
                 float percentageChange = JsonHelpers::json_get_float(request, "ExtractedPopulation");
-                int   pid = JsonHelpers::json_get_int(request, "PlanetId");
-                int   epoch = JsonHelpers::json_get_int(request, "Epoch");
                 float toExtract = PopulationPercentageToBiomass(toExtract);
 
-                std::string speciesName = JsonHelpers::json_get_string(request, "SpeciesName");
+                auto speciesJson = JsonHelpers::json_get_object(request, "Species");
+                std::string speciesName = JsonHelpers::json_get_string(picojson::value(speciesJson), "SpeciesName");
 
                 // Update 
                 try
@@ -70,6 +74,7 @@ namespace SpaceExploration
                     GameUtils::SaveBiomassValue(sd, mAlmanacServerCfg); 
                     toRet["EventString"] = picojson::value("ExtractResult");
                     toRet["NewBiomassAvialble"] = picojson::value(sd.BiomassAvailable);
+                    reloadPlanet = true;
                 }
                 catch (websocketpp::exception const & e)
                 {
@@ -90,11 +95,10 @@ namespace SpaceExploration
                 // Substract Percentage from them
                 // Add new species with percentage
                 float toDeploy = JsonHelpers::json_get_float(request, "DeployedBiomass");
-                int   pid = JsonHelpers::json_get_int(request, "PlanetId");
-                int   epoch = JsonHelpers::json_get_int(request, "Epoch");
-                std::string planetEpoch = std::to_string(pid)+std::to_string(epoch);
                 float percentageForDeployed = BiomassToPopulationPercentage(toDeploy);
-                std::string speciesName = JsonHelpers::json_get_string(request, "SpeciesName");
+
+                auto speciesJson = JsonHelpers::json_get_object(request, "Species");
+                std::string speciesName = JsonHelpers::json_get_string(picojson::value(speciesJson), "SpeciesName");
 
                 try
                 {
@@ -134,10 +138,12 @@ namespace SpaceExploration
                     newSpeciesPayload["Percentage"] = picojson::value(percentageForDeployed);
                     newSpeciesPayload["PlanetEpoch"] = picojson::value(planetEpoch);
                     newSpeciesPayload["SpeciesName"] = picojson::value(speciesName);
+                    newSpeciesPayload["CreatorName"] = picojson::value(sd.UserName);
                     url = "/persistence/speciessummaries/"+planetEpoch+"/"+speciesName;
                     PolyminisServer::HttpClient::Request(mAlmanacServerCfg.host, mAlmanacServerCfg.port, url,
                                                          PolyminisServer::HttpMethod::POST, newSpeciesPayload);
 
+                    reloadPlanet = true;
                 }
                 catch (websocketpp::exception const & e)
                 {
@@ -145,6 +151,18 @@ namespace SpaceExploration
                     return JsonHelpers::json_create_error("Error - Http Or WebSocket Error");
                 }
             }
+
+
+            if (reloadPlanet)
+            {
+                auto planet = mPlanetManager.GetPlanet(pid);
+                picojson::array species = GameUtils::GetSpeciesInPlanet(mAlmanacServerCfg, planetEpoch);
+                planet->SwapSpecies(species);
+
+                toRet["EventString"] = picojson::value("INTERACITON_RESULT");
+                toRet["UpdatedPlanet"] = picojson::value(planet->ToJson());
+            }
+
             return toRet;
         }
 }

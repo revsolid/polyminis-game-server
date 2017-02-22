@@ -30,6 +30,7 @@ namespace Inventory
         int slot  = JsonHelpers::json_get_int(request, "Slot");
 
         picojson::object toRet;
+        bool return_inventory = command == "GET_INVENTORY";
 
         toRet["Service"] = picojson::value("inventory");
         if (command == "SAMPLE_FROM_PLANET" || command == "RESEARCH" || command == "NEW_SPECIES")
@@ -38,7 +39,6 @@ namespace Inventory
             picojson::object invEntry;
 
             bool new_species = command == "NEW_SPECIES";
-
             // TODO: Shit load of anti-cheat stuff should happen here 
             // For now, we pray no one cheats xD
             //
@@ -87,6 +87,7 @@ namespace Inventory
             
             PolyminisServer::HttpClient::Request(mAlmanacServerCfg.host, mAlmanacServerCfg.port, "/persistence/inventoryentries/"+sd.UserName+"/"+std::to_string(slot),
                                                  PolyminisServer::HttpMethod::POST, invPayload);
+            return_inventory = true;
         }
         else if (command == "UPDATE_SPECIES")
         {
@@ -106,9 +107,17 @@ namespace Inventory
             PolyminisServer::HttpClient::Request(mAlmanacServerCfg.host, mAlmanacServerCfg.port, "/persistence/inventoryentries/"+sd.UserName+"/"+std::to_string(slot),
                                                  PolyminisServer::HttpMethod::PUT, invPayload);
         
+            return_inventory = true;
+        }
+        else if (command == "DISCARD_ENTRY")
+        {
+            // Delete inventory Entry
+            PolyminisServer::HttpClient::Request(mAlmanacServerCfg.host, mAlmanacServerCfg.port, "/persistence/inventoryentries/"+sd.UserName+"/"+std::to_string(slot),
+                                                 PolyminisServer::HttpMethod::DELETE, picojson::object());
         }
 
-        if (command == "GET_INVENTORY" || command == "UPDATE_SPECIES")
+        // ALWAYS Return the full inventory, it is a bit inneficient that we're reloading from the DB, but a Cache in Almanac would be the right answer //TODO-IN-A-MILLION-YEARS
+        if (return_inventory)
         {
 
             picojson::object entries_resp = PolyminisServer::HttpClient::Request(mAlmanacServerCfg.host, mAlmanacServerCfg.port, "/persistence/inventoryentries/"+sd.UserName,
@@ -127,12 +136,6 @@ namespace Inventory
                 flattenEntries.push_back(picojson::value(JsonHelpers::json_get_object(k, "InventoryEntry")));
             }
             toRet["InventoryEntries"] = picojson::value(flattenEntries);
-        }
-        else if (command == "DISCARD_ENTRY")
-        {
-            // Delete inventory Entry
-            PolyminisServer::HttpClient::Request(mAlmanacServerCfg.host, mAlmanacServerCfg.port, "/persistence/inventoryentries/"+sd.UserName+"/"+std::to_string(slot),
-                                                 PolyminisServer::HttpMethod::DELETE, picojson::object());
         }
         else
         {
