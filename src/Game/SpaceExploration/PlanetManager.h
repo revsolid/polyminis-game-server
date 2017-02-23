@@ -9,13 +9,14 @@
 class PlanetManager
 {
 public:
+    static Planet USELESS;
     PlanetManager(const std::initializer_list<std::pair<float, float>>& list);
 
     void AddPlanet(Planet inPlanet);
     void AddPlanet(float x, float y, unsigned int id);
 
-    std::shared_ptr<Planet> GetPlanet(unsigned int inId) const;
-    std::shared_ptr<Planet> GetPlanet(Coord point) const; // if there is a planet close to point
+    Planet& GetPlanet(unsigned int inId);
+    Planet& GetPlanet(Coord point); // if there is a planet close to point
 
     int GetNextPlanetId();
 

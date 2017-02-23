@@ -77,7 +77,8 @@ namespace SpaceExploration
         if (command == "INIT")
         {
             // Return ID?
-            to_ret = picojson::object();
+            CreatePlanetaryPayload(to_ret, Coord {x, y}, sd.VisibilityRange);
+            sd.Position = Coord { x, y };
         }
         else if (command == "ATTEMPT_MOVE")
         {

@@ -72,8 +72,8 @@ namespace SpaceExploration
                     sd.BiomassAvailable += toExtract; 
 
                     GameUtils::SaveBiomassValue(sd, mAlmanacServerCfg); 
-                    toRet["EventString"] = picojson::value("ExtractResult");
-                    toRet["NewBiomassAvialble"] = picojson::value(sd.BiomassAvailable);
+                    toRet["EventString"] = picojson::value("EXTRACT_RESULT");
+                    toRet["NewBiomassAvailable"] = picojson::value(sd.BiomassAvailable);
                     reloadPlanet = true;
                 }
                 catch (websocketpp::exception const & e)
@@ -82,8 +82,36 @@ namespace SpaceExploration
                     return JsonHelpers::json_create_error("Error - Http Or WebSocket Error");
                 }
             }
+            else if (command == "GET_TO_EDIT_IN_PLANET" || command == "SAMPLE_FROM_PLANET")
+            {
+                // Both of this commands mean 'Go get the full DNA from the DB for this Species'
+                auto speciesJson = JsonHelpers::json_get_object(request, "Species");
+
+                std::string speciesName = JsonHelpers::json_get_string(picojson::value(speciesJson), "SpeciesName");
+                toRet["Species"] = picojson::value(GameUtils::GetSpeciesFullData(mAlmanacServerCfg, planetEpoch, speciesName));
+                toRet["InPlanet"] = picojson::value((float)pid);
+
+                if (command == "GET_TO_EDIT_IN_PLANET")
+                {
+                    toRet["EventString"] = picojson::value("GET_EDIT_RESULT");
+                }
+                else
+                {
+                    toRet["EventString"] = picojson::value("SAMPLE_DNA_RESULT");
+                }
+            }
             else if (command == "EDIT_IN_PLANET")
             {
+                auto speciesJson = JsonHelpers::json_get_object(request, "Species");
+                std::string speciesName = JsonHelpers::json_get_string(picojson::value(speciesJson), "SpeciesName");
+                picojson::object newSpeciesPayload;
+                newSpeciesPayload["Splices"] = picojson::value(JsonHelpers::json_get_array(picojson::value(speciesJson), "Splices"));
+                std::string url = "/persistence/speciesinplanet/"+planetEpoch+"/"+speciesName;
+                PolyminisServer::HttpClient::Request(mAlmanacServerCfg.host, mAlmanacServerCfg.port, url,
+                                                     PolyminisServer::HttpMethod::PUT, newSpeciesPayload);
+
+                toRet["NewBiomassAvailable"] = picojson::value(sd.BiomassAvailable);
+                reloadPlanet = true;
             }
             else if (command == "DEPLOY") 
             {
@@ -102,18 +130,13 @@ namespace SpaceExploration
 
                 try
                 {
-                    std::string url = "/persistence/speciessummaries/"+planetEpoch;
-                    picojson::object response = PolyminisServer::HttpClient::Request(mAlmanacServerCfg.host, mAlmanacServerCfg.port, url,
-                                                                                     PolyminisServer::HttpMethod::GET, picojson::object());
-
                     if (toDeploy > sd.BiomassAvailable)
                     {
                         // Error
                         return JsonHelpers::json_create_error("Error - Trying to Deploy more Biomass than Available");
                     }
 
-                    auto response_v = picojson::value(response);
-                    auto species_arr = JsonHelpers::json_get_array(picojson::value(JsonHelpers::json_get_object(response_v, "Response")), "Items");
+                    auto species_arr = GameUtils::GetSpeciesInPlanet(mAlmanacServerCfg, planetEpoch);
 
                     for (auto species_json : species_arr)
                     {
@@ -124,22 +147,23 @@ namespace SpaceExploration
 
                         picojson::object xtractPayload;
                         xtractPayload["Percentage"] = picojson::value(newPercentage);
-                        url = "/persistence/speciessummaries/"+planetEpoch+"/"+sName;
+                        std::string url = "/persistence/speciessummaries/"+planetEpoch+"/"+sName;
                         PolyminisServer::HttpClient::Request(mAlmanacServerCfg.host, mAlmanacServerCfg.port, url,
                                                              PolyminisServer::HttpMethod::PUT, xtractPayload);
                     }
 
                     sd.BiomassAvailable -= toDeploy;
                     GameUtils::SaveBiomassValue(sd, mAlmanacServerCfg);
-                    toRet["EventString"] = picojson::value("DeployResult");
-                    toRet["NewBiomassAvialble"] = picojson::value(sd.BiomassAvailable);
+                    toRet["EventString"] = picojson::value("DEPLOY_RESULT");
+                    toRet["NewBiomassAvailable"] = picojson::value(sd.BiomassAvailable);
 
                     picojson::object newSpeciesPayload;
                     newSpeciesPayload["Percentage"] = picojson::value(percentageForDeployed);
                     newSpeciesPayload["PlanetEpoch"] = picojson::value(planetEpoch);
                     newSpeciesPayload["SpeciesName"] = picojson::value(speciesName);
                     newSpeciesPayload["CreatorName"] = picojson::value(sd.UserName);
-                    url = "/persistence/speciessummaries/"+planetEpoch+"/"+speciesName;
+                    newSpeciesPayload["Splices"] = picojson::value(JsonHelpers::json_get_array(picojson::value(speciesJson), "Splices"));
+                    std::string url = "/persistence/speciesinplanet/"+planetEpoch+"/"+speciesName;
                     PolyminisServer::HttpClient::Request(mAlmanacServerCfg.host, mAlmanacServerCfg.port, url,
                                                          PolyminisServer::HttpMethod::POST, newSpeciesPayload);
 
@@ -155,14 +179,16 @@ namespace SpaceExploration
 
             if (reloadPlanet)
             {
-                auto planet = mPlanetManager.GetPlanet(pid);
+                auto& planet = mPlanetManager.GetPlanet(pid);
                 picojson::array species = GameUtils::GetSpeciesInPlanet(mAlmanacServerCfg, planetEpoch);
-                planet->SwapSpecies(species);
+                planet.SwapSpecies(species);
 
-                toRet["EventString"] = picojson::value("INTERACITON_RESULT");
-                toRet["UpdatedPlanet"] = picojson::value(planet->ToJson());
+                toRet["EventString"] = picojson::value("INTERACTION_RESULT");
+                toRet["UpdatedPlanet"] = picojson::value(planet.ToJson());
+                std::cout << "Reloading Planet... y'all" << std::endl;
             }
 
+            std::cout << " Sending down Event: " << picojson::value(toRet).serialize() << std::endl;
             return toRet;
         }
 }

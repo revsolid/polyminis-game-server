@@ -67,6 +67,7 @@ namespace User
             if (result.count("Biomass"))
             {
                 to_ret["Biomass"] = result["Biomass"];
+                sessionData.BiomassAvailable = JsonHelpers::json_get_float(picojson::value(result), "Biomass");
             }
 
         }

@@ -1,6 +1,6 @@
 #include "PlanetManager.h"
 
-
+Planet PlanetManager::USELESS = Planet(0, 0, -1);
 
 PlanetManager::PlanetManager(const std::initializer_list<std::pair<float, float>>& list) : mNextPlanetId(0)
 {
@@ -11,29 +11,29 @@ PlanetManager::PlanetManager(const std::initializer_list<std::pair<float, float>
     }
 }    
 
-std::shared_ptr<Planet> PlanetManager::GetPlanet(unsigned int inId) const
+Planet& PlanetManager::GetPlanet(unsigned int inId)
 {
-    for (auto p : mPlanets)
+    for (auto& p : mPlanets)
     {
         if (p.GetID() == inId)
         {
-            return std::make_shared<Planet>(p);
+            return p;
         }
     }
-    return nullptr;
+    return PlanetManager::USELESS;
 }
 
-std::shared_ptr<Planet> PlanetManager::GetPlanet(Coord point) const
+Planet& PlanetManager::GetPlanet(Coord point)
 {
     float threshold = 0.1f;
-    for (auto p : mPlanets)
+    for (auto& p : mPlanets)
     {
         if (Coord::Distance(p.GetPos(), point) < threshold)
         {
-            return std::make_shared<Planet>(p);
+            return p;
 		}
     }
-    return nullptr;
+    return PlanetManager::USELESS;
 }
 
 

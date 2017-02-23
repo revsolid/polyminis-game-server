@@ -26,7 +26,6 @@ namespace GameUtils
 
     picojson::array GetSpeciesInPlanet(const PolyminisServer::ServerCfg& almanacServerCfg, const std::string& planetEpoch)
     {
-        std::cout << "XXXXXXXX" << std::endl;
         picojson::object species_in_planet_resp = PolyminisServer::HttpClient::Request(almanacServerCfg.host,
                                                                                        almanacServerCfg.port,
                                                                                        "/persistence/speciessummaries/"+planetEpoch,
@@ -37,5 +36,18 @@ namespace GameUtils
         auto species_in_planet = JsonHelpers::json_get_object(species_in_planet_resp_v, "Response");
         auto species_in_planet_value = picojson::value(species_in_planet);
         return JsonHelpers::json_get_array(species_in_planet_value, "Items");
+    }
+
+    picojson::object GetSpeciesFullData(const PolyminisServer::ServerCfg& almanacServerCfg, const std::string& planetEpoch, const std::string& speciesName)
+    {
+        picojson::object species_resp = PolyminisServer::HttpClient::Request(almanacServerCfg.host,
+                                                                             almanacServerCfg.port,
+                                                                             "/persistence/speciesinplanet/"+planetEpoch+"/"+speciesName,
+                                                                             PolyminisServer::HttpMethod::GET,
+                                                                             picojson::object());
+
+        auto species_resp_v = picojson::value(species_resp);
+        auto species = JsonHelpers::json_get_object(species_resp_v, "Response");
+        return species;
     }
 }
