@@ -82,23 +82,15 @@ namespace SpaceExploration
                     return JsonHelpers::json_create_error("Error - Http Or WebSocket Error");
                 }
             }
-            else if (command == "GET_TO_EDIT_IN_PLANET" || command == "SAMPLE_FROM_PLANET")
+            else if (command == "GET_TO_EDIT_IN_PLANET")
             {
-                // Both of this commands mean 'Go get the full DNA from the DB for this Species'
                 auto speciesJson = JsonHelpers::json_get_object(request, "Species");
 
                 std::string speciesName = JsonHelpers::json_get_string(picojson::value(speciesJson), "SpeciesName");
                 toRet["Species"] = picojson::value(GameUtils::GetSpeciesFullData(mAlmanacServerCfg, planetEpoch, speciesName));
                 toRet["InPlanet"] = picojson::value((float)pid);
 
-                if (command == "GET_TO_EDIT_IN_PLANET")
-                {
-                    toRet["EventString"] = picojson::value("GET_EDIT_RESULT");
-                }
-                else
-                {
-                    toRet["EventString"] = picojson::value("SAMPLE_DNA_RESULT");
-                }
+                toRet["EventString"] = picojson::value("GET_EDIT_RESULT");
             }
             else if (command == "EDIT_IN_PLANET")
             {
@@ -106,7 +98,7 @@ namespace SpaceExploration
                 std::string speciesName = JsonHelpers::json_get_string(picojson::value(speciesJson), "SpeciesName");
                 picojson::object newSpeciesPayload;
                 newSpeciesPayload["Splices"] = picojson::value(JsonHelpers::json_get_array(picojson::value(speciesJson), "Splices"));
-                std::string url = "/persistence/speciesinplanet/"+planetEpoch+"/"+speciesName;
+                std::string url = "/persistence/speciessummaries/"+planetEpoch+"/"+speciesName;
                 PolyminisServer::HttpClient::Request(mAlmanacServerCfg.host, mAlmanacServerCfg.port, url,
                                                      PolyminisServer::HttpMethod::PUT, newSpeciesPayload);
 

@@ -42,7 +42,7 @@ namespace GameUtils
     {
         picojson::object species_resp = PolyminisServer::HttpClient::Request(almanacServerCfg.host,
                                                                              almanacServerCfg.port,
-                                                                             "/persistence/speciesinplanet/"+planetEpoch+"/"+speciesName,
+                                                                             "/persistence/speciessummaries/"+planetEpoch+"/"+speciesName,
                                                                              PolyminisServer::HttpMethod::GET,
                                                                              picojson::object());
 
