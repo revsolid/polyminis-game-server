@@ -26,7 +26,7 @@ public:
     ~SpaceMapSession(){}
 
     bool AttemptMove(Coord inCoord);
-    bool AttemptWarp(const PlanetManager& pManager, Coord point);
+    bool AttemptWarp(PlanetManager& pManager, Coord point);
 
     Coord GetPos();
     float GetVisibilityRange() { return 600.0f; } //TODO: Where does this come from?

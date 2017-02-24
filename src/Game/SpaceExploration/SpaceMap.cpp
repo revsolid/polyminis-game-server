@@ -1,5 +1,7 @@
 #include "SpaceMap.h"
 
+//TODO: This file seems to no longer make sense now with SessionData
+// Should delete ?
 Coord SpaceMapSession::GetPos()
 {
     return mPosition;
@@ -22,14 +24,14 @@ bool SpaceMapSession::AttemptMove(Coord inCoord)
     return true;
 }
 
-bool SpaceMapSession::AttemptWarp(const PlanetManager& pManager, Coord point)
+bool SpaceMapSession::AttemptWarp(PlanetManager& pManager, Coord point)
 {
-    std::shared_ptr<Planet> dest = pManager.GetPlanet(point);
+    Planet dest = pManager.GetPlanet(point);
 
     // TODO: shouldn't be able to warp all the time
-    if (dest != nullptr)
+    if (dest.GetID() != -1)
     {
-        mPosition = dest->GetPos();
+        mPosition = dest.GetPos();
         return true;
     }
     return false;

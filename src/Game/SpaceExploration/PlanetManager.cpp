@@ -1,6 +1,6 @@
 #include "PlanetManager.h"
 
-
+Planet PlanetManager::USELESS = Planet(0, 0, -1);
 
 PlanetManager::PlanetManager(const std::initializer_list<std::pair<float, float>>& list) : mNextPlanetId(0)
 {
@@ -11,29 +11,29 @@ PlanetManager::PlanetManager(const std::initializer_list<std::pair<float, float>
     }
 }    
 
-std::shared_ptr<Planet> PlanetManager::GetPlanet(unsigned int inId) const
+Planet& PlanetManager::GetPlanet(unsigned int inId)
 {
-    for (auto p : mPlanets)
+    for (auto& p : mPlanets)
     {
         if (p.GetID() == inId)
         {
-            return std::make_shared<Planet>(p);
+            return p;
         }
     }
-    return nullptr;
+    return PlanetManager::USELESS;
 }
 
-std::shared_ptr<Planet> PlanetManager::GetPlanet(Coord point) const
+Planet& PlanetManager::GetPlanet(Coord point)
 {
     float threshold = 0.1f;
-    for (auto p : mPlanets)
+    for (auto& p : mPlanets)
     {
         if (Coord::Distance(p.GetPos(), point) < threshold)
         {
-            return std::make_shared<Planet>(p);
+            return p;
 		}
     }
-    return nullptr;
+    return PlanetManager::USELESS;
 }
 
 
@@ -56,41 +56,7 @@ picojson::array PlanetManager::GetVisiblePlanets(Coord inCoord, float distance)
     {
         if (p.IsVisible(inCoord, distance))
         {
-            picojson::object obj;
-
-            obj["ID"] = picojson::value((double)p.GetID());
-            obj["PlanetName"] = picojson::value(p.GetName());
-
-            picojson::object position_obj;
-            auto pos = p.GetPos();
-            position_obj["x"] = picojson::value(pos.x);
-            position_obj["y"] = picojson::value(pos.y);
-            obj["SpaceCoords"] = picojson::value(position_obj);
-
-
-            picojson::object temp_obj;
-            auto temp = p.GetTemperatureRange();
-            temp_obj["Min"] = picojson::value(temp.Min);
-            temp_obj["Max"] = picojson::value(temp.Max);
-            obj["Temperature"] = picojson::value(temp_obj);
-
-            picojson::object ph_obj;
-            auto ph = p.GetPhRange();
-            ph_obj["Min"] = picojson::value(temp.Min); 
-            ph_obj["Max"] = picojson::value(temp.Max);
-            obj["Ph"] = picojson::value(ph_obj);
-
-            picojson::array species_arr;
-            for (auto s : p.GetSpeciesInPlanet())
-            {
-                picojson::object species_obj;
-                species_obj["Name"] = picojson::value(s.Name);
-                species_arr.push_back(picojson::value(species_obj));
-            }
-            
-            obj["Species"] = picojson::value(species_arr);
-
-            retVal.push_back(picojson::value(obj));
+            retVal.push_back(picojson::value(p.ToJson()));
         }
     }
 

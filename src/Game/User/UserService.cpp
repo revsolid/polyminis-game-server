@@ -58,6 +58,18 @@ namespace User
             {
                 to_ret["LastKnownPosition"] =  result["LastKnownPosition"];
             }
+
+            if (result.count("InventorySlots") > 0)
+            {
+                to_ret["InventorySlots"] =  result["InventorySlots"];
+            }
+
+            if (result.count("Biomass"))
+            {
+                to_ret["Biomass"] = result["Biomass"];
+                sessionData.BiomassAvailable = JsonHelpers::json_get_float(picojson::value(result), "Biomass");
+            }
+
         }
         catch (websocketpp::exception const & e)
         {

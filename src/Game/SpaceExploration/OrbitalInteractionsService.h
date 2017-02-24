@@ -17,6 +17,7 @@ namespace SpaceExploration
 
     private:
         PolyminisServer::ServerCfg mAlmanacServerCfg;
+        PlanetManager& mPlanetManager;
 
         float BiomassToPopulationPercentage(float biomass) { return biomass; }
         float PopulationPercentageToBiomass(float percentage) { return percentage; }
