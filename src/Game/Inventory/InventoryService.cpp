@@ -1,12 +1,14 @@
 #include "InventoryService.h"
 #include "Core/JsonHelpers.h"
 #include "Core/HttpClient.h"
+#include "Game/GameUtils.h"
 #include <time.h>
 
 namespace Inventory
 {
     InventoryService::InventoryService(PolyminisServer::WSServer& server,
-                                       PolyminisServer::ServerCfg almanacServerCfg) : mAlmanacServerCfg(almanacServerCfg)
+                                       PolyminisServer::ServerCfg& almanacServerCfg, 
+                                       PolyminisGameRules::GameRules& gameRules) : mAlmanacServerCfg(almanacServerCfg), mGameRules(gameRules)
     {
         auto wss = std::make_shared<PolyminisServer::WSService>();
         wss->mServiceName = "inventory";
@@ -75,10 +77,16 @@ namespace Inventory
                 invEntry["InventoryType"] = picojson::value("Research");
                 invEntry["Value"] = picojson::value(CreateResearchPayload(pid, epoch, speciesName));
             }  
-            else if (command == "SAMPLE_FROM_PLANET" || command == "NEW_SPECIES")
+            else
             {
+                std::string planetEpoch = std::to_string(pid)+std::to_string(epoch);
                 invEntry["InventoryType"] = picojson::value("SpeciesSeed");
-                invEntry["Value"] = picojson::value(CreateSpeciesSeedPayload(speciesData, std::to_string(pid)+std::to_string(epoch), speciesName, new_species, sd));
+
+                if (command == "SAMPLE_FROM_PLANET")
+                {
+                    speciesData = picojson::value(GameUtils::GetSpeciesFullData(mAlmanacServerCfg, planetEpoch, speciesName));
+                }
+                invEntry["Value"] = picojson::value(CreateSpeciesSeedPayload(speciesData, planetEpoch, speciesName, new_species, sd));
             }
 
             invPayload["UserName"] = picojson::value(sd.UserName);

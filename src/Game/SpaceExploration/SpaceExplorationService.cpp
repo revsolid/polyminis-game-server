@@ -6,10 +6,12 @@
 namespace SpaceExploration
 {
     SpaceExplorationService::SpaceExplorationService(PolyminisServer::WSServer& server,
-                                                     PlanetManager& pManager,
-                                                     PolyminisServer::ServerCfg almanacServerCfg) :
-                                                     mPlanetManager(pManager),
-                                                     mAlmanacServerCfg(almanacServerCfg)
+                                PolyminisServer::ServerCfg& almanacServerCfg,
+                                PolyminisGameRules::GameRules& gameRules,
+                                PlanetManager& pManager) :
+                                mAlmanacServerCfg(almanacServerCfg),
+                                mGameRules(gameRules),
+                                mPlanetManager(pManager)
     {
         auto wss = std::make_shared<PolyminisServer::WSService>();
         wss->mServiceName = "space_exploration";
@@ -98,7 +100,7 @@ namespace SpaceExploration
             //destPoint.x = x;
             //destPoint.y = y;
             float warpCost = CalcWarpCost(sd.Position, destPoint);
-            bool canWarp = (sd.BiomassAvailable > warpCost); 
+            bool canWarp = (warpCost > 0.0f) && (sd.BiomassAvailable > warpCost); 
 
             to_ret["EventString"] = picojson::value("WARP");
             if (canWarp)
@@ -113,13 +115,20 @@ namespace SpaceExploration
             }
             else
             {
-                to_ret["ErrorMessage"] = picojson::value("NOT_ENOUGH_BIOMASS");
+                if (warpCost < 0.0)
+                    to_ret["ErrorMessage"] = picojson::value("CANT_WARP_THAT_FAR");
+                else
+                    to_ret["ErrorMessage"] = picojson::value("NOT_ENOUGH_BIOMASS");
             }
         }
         else if (command == "CALC_WARP_COST")
         {
             Coord destPoint {x, y};
             float warpCost = CalcWarpCost(sd.Position, destPoint); // What's the warp cost?
+            if (warpCost < 0.0f)
+            {
+                to_ret["TooFar"] = picojson::value(true);
+            }
             to_ret["WarpCost"] = picojson::value(warpCost);
             to_ret["EventString"] = picojson::value("WARP_COST_RESULT");
         }
@@ -181,7 +190,15 @@ namespace SpaceExploration
     float SpaceExplorationService::CalcWarpCost(const Coord& start, const Coord& target)
     {
         // TODO: What are the rules? Can we make this data-driven or something that doesn't require recompiling
-        // to change :) ?
-        return 1.0f;
+        // to change :) ? - YES WE CAN!
+        std::cout << "CALC'ING WARP" << std::endl;
+        float d = Coord::Distance(start, target);
+        if (d > mGameRules.GetMaxWarpDistance())
+        {
+            std::cout << "Too Far to Warp!: " << d << "/" << mGameRules.GetMaxWarpDistance() <<  std::endl;
+            return -1.0f;
+        }
+
+        return mGameRules.GetWarpCost(d);
     }
 }

@@ -1,4 +1,5 @@
 #include "JsonHelpers.h"
+
 namespace JsonHelpers
 {
     const picojson::object Empty = picojson::object();
@@ -101,6 +102,17 @@ namespace JsonHelpers
             return Empty;
         }
         return v.get<picojson::object>();
+    }
+
+
+    float json_get_as_float(const picojson::value& v)
+    {
+        if (!v.is<double>())
+        {
+            std::cout << "Error value is not an object (json_get_object)" << std::endl;
+            return 0.0;
+        }
+        return (float) v.get<double>();
     }
 
     const picojson::array& json_get_array(const picojson::value& v, const std::string& fieldname)

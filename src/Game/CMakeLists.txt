@@ -1,4 +1,6 @@
 FILE(GLOB SRC
+    "Admin/*.h"
+    "Admin/*.cpp"
     "CreatureObservation/*.h"
     "CreatureObservation/*.cpp"
     "Inventory/*.h"

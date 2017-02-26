@@ -1,5 +1,6 @@
 #pragma once
 #include "Core/Server.h"
+#include "Game/GameRules.h"
 
 namespace Inventory
 {
@@ -7,7 +8,8 @@ namespace Inventory
     {
     public:
         InventoryService(PolyminisServer::WSServer& server,
-                         PolyminisServer::ServerCfg almanacServerCfg);
+                         PolyminisServer::ServerCfg& almanacServerCfg,
+                         PolyminisGameRules::GameRules& gameRules);
         picojson::object InventoryEndpoint(picojson::value& command, PolyminisServer::SessionData& sd);
         bool GetSpeciesDateonDB();
 
@@ -19,6 +21,7 @@ namespace Inventory
                                                   const PolyminisServer::SessionData& sd);
 
         // Members
-        PolyminisServer::ServerCfg mAlmanacServerCfg;
+        PolyminisServer::ServerCfg& mAlmanacServerCfg;
+        PolyminisGameRules::GameRules& mGameRules;
     };
 }
