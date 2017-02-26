@@ -1,5 +1,6 @@
 #pragma once
 #include "Core/Server.h"
+#include "Game/GameRules.h"
 #include "PlanetManager.h"
 #include "SpaceMap.h"
 
@@ -10,14 +11,17 @@ namespace SpaceExploration
     {
     public:
         OrbitalInteractionsService(PolyminisServer::WSServer& server,
-                                   PlanetManager& pManager,
-                                   PolyminisServer::ServerCfg almanacServerCfg);
+                                   PolyminisServer::ServerCfg& almanacServerCfg,
+                                   PolyminisGameRules::GameRules& gameRules,
+                                   PlanetManager& pManager);
+                                   
 
         picojson::object OISEndpoint(picojson::value& request, PolyminisServer::SessionData& sd);
 
     private:
         PolyminisServer::ServerCfg mAlmanacServerCfg;
         PlanetManager& mPlanetManager;
+        PolyminisGameRules::GameRules& mGameRules;
 
         float BiomassToPopulationPercentage(float biomass) { return biomass; }
         float PopulationPercentageToBiomass(float percentage) { return percentage; }

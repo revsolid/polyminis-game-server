@@ -8,8 +8,13 @@
 namespace SpaceExploration
 {
 
-        OrbitalInteractionsService::OrbitalInteractionsService(PolyminisServer::WSServer& server, PlanetManager& pManager,
-                                                               PolyminisServer::ServerCfg almanacServerCfg) : mAlmanacServerCfg(almanacServerCfg), mPlanetManager(pManager)
+        OrbitalInteractionsService::OrbitalInteractionsService(PolyminisServer::WSServer& server,
+                                                               PolyminisServer::ServerCfg& almanacServerCfg,
+                                                               PolyminisGameRules::GameRules& gameRules,
+                                                               PlanetManager& pManager) :
+                                                               mAlmanacServerCfg(almanacServerCfg),
+                                                               mGameRules(gameRules),
+                                                               mPlanetManager(pManager)
         {
             auto wss = std::make_shared<PolyminisServer::WSService>();
             wss->mServiceName = "orbital_interactions";

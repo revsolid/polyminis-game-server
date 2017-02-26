@@ -7,7 +7,8 @@
 namespace Inventory
 {
     InventoryService::InventoryService(PolyminisServer::WSServer& server,
-                                       PolyminisServer::ServerCfg almanacServerCfg) : mAlmanacServerCfg(almanacServerCfg)
+                                       PolyminisServer::ServerCfg& almanacServerCfg, 
+                                       PolyminisGameRules::GameRules& gameRules) : mAlmanacServerCfg(almanacServerCfg), mGameRules(gameRules)
     {
         auto wss = std::make_shared<PolyminisServer::WSService>();
         wss->mServiceName = "inventory";

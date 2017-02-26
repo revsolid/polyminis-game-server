@@ -13,6 +13,8 @@ namespace JsonHelpers
 
     const picojson::object& json_get_as_object(const picojson::value& v);
 
+    float json_get_as_float(const picojson::value& v);
+
     bool json_has_field(const picojson::value& v, const std::string& fieldname);
 
     // ERRORS
