@@ -154,6 +154,7 @@ picojson::object Planet::ToJson()
         species_obj["SpeciesName"] = picojson::value(s.Name);
         species_obj["CreatorName"] = picojson::value(s.CreatorName);
         species_obj["PlanetEpoch"] = picojson::value(s.PlanetEpoch);
+        species_obj["Percentage"]  = picojson::value(s.Percentage);
         species_arr.push_back(picojson::value(species_obj));
     }
         

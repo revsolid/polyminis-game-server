@@ -75,7 +75,7 @@ namespace Inventory
             if (command == "RESEARCH")
             {
                 invEntry["InventoryType"] = picojson::value("Research");
-                invEntry["Value"] = picojson::value(CreateResearchPayload(pid, epoch, speciesName));
+                invEntry["Value"] = picojson::value(CreateResearchPayload(speciesData, pid, epoch, speciesName, sd));
             }  
             else
             {
@@ -117,11 +117,12 @@ namespace Inventory
         
             return_inventory = true;
         }
-        else if (command == "DISCARD_ENTRY")
+        else if (command == "DELETE_ENTRY")
         {
             // Delete inventory Entry
             PolyminisServer::HttpClient::Request(mAlmanacServerCfg.host, mAlmanacServerCfg.port, "/persistence/inventoryentries/"+sd.UserName+"/"+std::to_string(slot),
                                                  PolyminisServer::HttpMethod::DELETE, picojson::object());
+            return_inventory = true;
         }
 
         // ALWAYS Return the full inventory, it is a bit inneficient that we're reloading from the DB, but a Cache in Almanac would be the right answer //TODO-IN-A-MILLION-YEARS
@@ -141,7 +142,9 @@ namespace Inventory
             picojson::array flattenEntries;
             for (auto k : JsonHelpers::json_get_array(entries_value, "Items"))
             {
-                flattenEntries.push_back(picojson::value(JsonHelpers::json_get_object(k, "InventoryEntry")));
+                auto ie = JsonHelpers::json_get_object(k, "InventoryEntry");
+                ie["Slot"] = picojson::value(JsonHelpers::json_get_float(k, "Slot"));
+                flattenEntries.push_back(picojson::value(ie));
             }
             toRet["InventoryEntries"] = picojson::value(flattenEntries);
         }
@@ -153,20 +156,17 @@ namespace Inventory
         return std::move(toRet);
     }
 
-    picojson::object InventoryService::CreateResearchPayload(int pid, int epoch, const std::string& speciesName)
+    picojson::object InventoryService::CreateResearchPayload(const picojson::value& speciesData, int pid, int epoch, const std::string& speciesName,
+                                                             const PolyminisServer::SessionData& sd)
     {
 // TODO: GAME_RULES - Tagging al places that have Game rules implemented for later tracking 
 // Hardcoding it to something now, it should take into account a bunch of factors like player level
-#define RESEARCH_TIME 60 
-        picojson::object payload;
+#define RESEARCH_EPOCHS 2
+        picojson::object payload = CreateSpeciesSeedPayload(speciesData, std::to_string(pid) + std::to_string(epoch), speciesName, false, sd);
 
-        payload["PlanetEpoch"] = picojson::value(std::to_string(pid) + std::to_string(epoch));
-        payload["ResearchedSpeciesName"] = picojson::value(speciesName);
-
-        //
-        // The idea is that research takes a slot for some amount of time
-        payload["Done"] = picojson::value((double)std::time(0) + RESEARCH_TIME);
-        
+        payload["BeingResearched"] = picojson::value(true);
+        payload["EpochStarted"] = picojson::value((double)epoch);
+        payload["EpochDone"] = picojson::value((double)(epoch + RESEARCH_EPOCHS));
         return std::move(payload);
     }
 
