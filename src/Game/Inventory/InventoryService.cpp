@@ -84,7 +84,7 @@ namespace Inventory
 
                 if (command == "SAMPLE_FROM_PLANET")
                 {
-                    speciesData = picojson::value(GameUtils::GetSpeciesFullData(mAlmanacServerCfg, planetEpoch, speciesName));
+                    speciesData = picojson::value(GameDBUtils::GetSpeciesInPlanet(mAlmanacServerCfg, planetEpoch, speciesName));
                 }
                 invEntry["Value"] = picojson::value(CreateSpeciesSeedPayload(speciesData, planetEpoch, speciesName, new_species, sd));
             }

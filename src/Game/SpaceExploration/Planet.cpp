@@ -157,7 +157,7 @@ picojson::object Planet::ToJson()
         species_obj["Percentage"]  = picojson::value(s.Percentage);
         species_arr.push_back(picojson::value(species_obj));
     }
-        
+
     obj["Species"] = picojson::value(species_arr);
     return obj;
 }

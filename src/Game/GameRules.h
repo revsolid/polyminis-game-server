@@ -1,5 +1,7 @@
 #pragma once
 #include "Core/JsonHelpers.h"
+
+#include <mutex>
 #include <vector>
 
 namespace PolyminisGameRules
@@ -16,12 +18,16 @@ namespace PolyminisGameRules
         float GetBiomassToPercentage(float biomass); 
         float GetMaxWarpDistance();
 
-        bool SaveIntoFile(std::string filePath);
+        const picojson::object& GetSpliceData() const;
+        const picojson::object& GetTraitData() const;
+
         bool SaveToDB(const PolyminisServer::ServerCfg& almanacServerCfg);
 
         void ReloadFromJson(const picojson::value& config);
         void ReloadFromDB(const PolyminisServer::ServerCfg& almanacServerCfg);
         picojson::value SerializeRules();
+
+        picojson::value CreateTranslationTable(const picojson::value& splices);
 
     private:
         void SetWarpCostCurve(const picojson::value& wCC);
@@ -29,15 +35,20 @@ namespace PolyminisGameRules
         void SetBiomassToPercentageCurve(const picojson::value& b2PC);
 
         void LoadFromDB(const PolyminisServer::ServerCfg& almanacServerCfg);
-        void LoadFromFile(std::string path);
         void LoadFromJsonObj(const picojson::value& config);
-
 
         float EvalWarpCostCurve(float t);
         float EvalPercentageToBiomassCurve(float t);
         float EvalBiomassToPercentageCurve(float t);
 
 // Members
+//
+//
+        
+//
+        std::shared_ptr<std::mutex> GameRulesLock;
+
+// Rules
         std::vector<float> WarpCostCurveEvals;
         std::string WCAnimationCurveSerialized;
 
@@ -47,10 +58,18 @@ namespace PolyminisGameRules
 
         // X-Biomass Deployed into a Planet -> Y Percentage of Population
         std::vector<float> B2PCurveEvals;
-        std::string B2PAnimationCurveSerialized;
+        std::string B2PAnimationCurveSerialized;        
 
         float BaseWarpCost;
         float WarpCostMultiplier;
         float MaxWarpDistance;
+
+// Static Data
+        std::unordered_map<std::string, picojson::value> SpliceData;
+        // Trait Data is a table from internal name to TierId and Number
+        picojson::object TraitData;
+        
+        std::vector<picojson::value> DefaultTraits; 
+
     };
 }

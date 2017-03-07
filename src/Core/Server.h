@@ -29,6 +29,9 @@ namespace PolyminisServer
         
         std::string UserName;
 
+#define SIM_SERVER_ID_INVALID (-1)
+        int         SimulationServerId = SIM_SERVER_ID_INVALID;
+
         float       BiomassAvailable;
         float       VisibilityRange = 600.0f;
         Coord       Position; 
@@ -79,8 +82,6 @@ namespace PolyminisServer
  
         // Data to keep per Session
         std::map<websocketpp::connection_hdl, SessionData, std::owner_less<websocketpp::connection_hdl>> mConnections;
-
-       // std::map<connection_hdl,connection_data,std::owner_less<connection_hdl>> con_list;
 
         ws_server_t mServer;
         std::unordered_map<std::string, std::shared_ptr<WSService>> mServices;
