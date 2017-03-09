@@ -72,6 +72,24 @@ namespace GameDBUtils
     {
         return GetSpeciesInPlanet_internal(almanacServerCfg, planetEpoch, speciesName, false);
     }
+
+    int GetGlobalEpoch(const PolyminisServer::ServerCfg& almanacServerCfg)
+    {
+        std::string url = "/persistence/epochcounter/V1";
+
+        picojson::object globalEpoch_resp = PolyminisServer::HttpClient::Request(almanacServerCfg.host,
+                                                                             almanacServerCfg.port,
+                                                                             url,
+                                                                             PolyminisServer::HttpMethod::GET,
+                                                                             picojson::object());
+
+        auto epoch_resp_v = picojson::value(globalEpoch_resp);
+        auto epoch = JsonHelpers::json_get_object(epoch_resp_v, "Response");
+        return JsonHelpers::json_get_int(picojson::value(epoch), "Epoch");
+
+    }
+
+
 }
 
 namespace GameSimUtils

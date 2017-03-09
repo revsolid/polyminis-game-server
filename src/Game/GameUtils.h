@@ -17,6 +17,8 @@ namespace GameDBUtils
 
     // These functions hit the SpeciesInPlanet db endpoint and will bring down ALL the data for the species, so use ONLY IF ALL THE DATA IS NEEDED 
     picojson::object GetSpeciesGeneticPayload(const PolyminisServer::ServerCfg& almanacServerCfg, const std::string& planetEpoch, const std::string& speciesName);
+    
+    int GetGlobalEpoch(const PolyminisServer::ServerCfg& almanacServerCfg);
 }
 
 
