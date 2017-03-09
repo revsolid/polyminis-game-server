@@ -212,6 +212,7 @@ namespace Inventory
         }
     //    payload["InstinctTuning"] = picojson::value(JsonHelpers::json_get_object(speciesData, "InstinctTuning"));
         payload["Splices"] = picojson::value(JsonHelpers::json_get_array(speciesData, "Splices"));
+        payload["InstinctTuning"] = picojson::value(JsonHelpers::json_get_object(speciesData, "InstinctTuning"));
 
         return std::move(payload);
     }
