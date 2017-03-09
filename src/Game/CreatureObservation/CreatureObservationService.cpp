@@ -40,58 +40,6 @@ namespace CreatureObservation
                              return this->CreatureObservationEndpoint(request, sd);
                          };
         server.AddService(wss);
-
-/*
-        mSimulationPollingSlave = std::thread(
-            [=]
-            {
-                //
-                while (!mStopPolling)
-                {
-                    for (auto& kv : mConnections) 
-                    {
-                        int session = kv.first;
-
-                        {
-                            std::lock_guard<std::mutex>(*kv.second.Lock);
-                            if (!kv.second.Poll)
-                            {
-                                continue;
-                            }
-                        }
-
-                        int step = -1;
-                        int epoch = -1;
-                        {
-                            std::lock_guard<std::mutex>(*kv.second.Lock);
-                            step = kv.second.Step;
-                            epoch = kv.second.Epoch;
-                        }
-
-                        // Go Fetch information from the Sim Server
-                        {
-                            auto res = GameSimUtils::GetSimulationSteps(mSimServerCfg, session, epoch, step); 
-
-                            {
-                                std::lock_guard<std::mutex>(*kv.second.Lock);
-                                // Write the information into the StepsToSend field
-                                for(auto r : res)
-                                {
-                                    kv.second.StepsToSend.push(r);
-                                }
-                                
-                                // Update the State
-                                kv.second.Step = step; 
-                                kv.second.Epoch = epoch; // (? - Not sure if epoch changing here makes any sense) 
-                            }
-                        }
-                    }
-                    //
-                    std::this_thread::sleep_for(std::chrono::seconds(2));
-                }
-            }
-        );
-*/
     }
 
     CreatureObservationService::~CreatureObservationService()

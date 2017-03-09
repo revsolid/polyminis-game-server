@@ -210,6 +210,8 @@ namespace GameSimUtils
         simData["EpochNum"] = picojson::value((double)epoch);
         simData["Epoch"] = picojson::value(epochObj);
 
+        simData["EliteIndividuals"] = picojson::value(5.0f);
+
 
         picojson::array flatMasterTT;
         for(auto kv : masterTT)
