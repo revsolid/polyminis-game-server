@@ -23,8 +23,10 @@ namespace GameDBUtils
 namespace GameSimUtils
 {
     picojson::object CreateSimulationServer(const PolyminisServer::ServerCfg& simServerCfg);
-    picojson::array GetSimulationSteps(const PolyminisServer::ServerCfg& simServerCfg, int simSessionId, int& epoch, int& step);
+    picojson::array GetSimulationSteps(const PolyminisServer::ServerCfg& simServerCfg, int simSessionId, int& epoch, int& inout_startAtStep, int maxSteps = 100);
 
+    picojson::array GetSpecies(const PolyminisServer::ServerCfg& simServerCfg, int simSessionId, int epoch); 
+    picojson::object GetEnvironment(const PolyminisServer::ServerCfg& simServerCfg, int simSessionId, int epoch); 
 
     picojson::object RunSimulation(const PolyminisServer::ServerCfg& simServerCfg, const PolyminisServer::ServerCfg& almanacServerCfg, const picojson::object& masterTT,
                                    int simSessionId, int planetId, int epoch);

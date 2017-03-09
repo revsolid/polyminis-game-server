@@ -26,7 +26,6 @@ namespace CreatureObservation
             Lock = std::make_shared<std::mutex>();
         }
 
-
         SimulationConnection(uint e) : Epoch(e), Step(0), Poll(false)
         {
             Lock = std::make_shared<std::mutex>();

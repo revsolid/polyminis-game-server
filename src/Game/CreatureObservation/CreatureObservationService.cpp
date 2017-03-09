@@ -41,6 +41,7 @@ namespace CreatureObservation
                          };
         server.AddService(wss);
 
+/*
         mSimulationPollingSlave = std::thread(
             [=]
             {
@@ -90,12 +91,11 @@ namespace CreatureObservation
                 }
             }
         );
+*/
     }
 
     CreatureObservationService::~CreatureObservationService()
     {
-        mStopPolling = true;
-        mSimulationPollingSlave.join();
     }
 
     picojson::object CreatureObservationService::CreatureObservationEndpoint(picojson::value& request, PolyminisServer::SessionData& sd)
@@ -127,7 +127,7 @@ namespace CreatureObservation
             }
             else
             {
-                SimulationConnection s((uint)JsonHelpers::json_get_int(request, ""));
+                SimulationConnection s(sd.SimulationServerId);
                 mConnections[sd.SimulationServerId] = std::move(s);
             }
 
@@ -137,39 +137,48 @@ namespace CreatureObservation
         if (command == "GO_TO_EPOCH")
         {
             int pid   = 3;
-            int epoch = 0; 
+            int epoch = 16; 
             int step = 0;
+
+            pid = JsonHelpers::json_get_int(request, "PlanetId");
+            epoch = JsonHelpers::json_get_int(request, "Epoch");
 
             GameSimUtils::RunSimulation(mSimServerCfg, mAlmanacServerCfg, mGameRules.GetTraitData(), sd.SimulationServerId, pid, epoch);
             auto& simConnection = mConnections[sd.SimulationServerId];
             {
-                std::lock_guard<std::mutex>(*simConnection.Lock);
                 simConnection.Epoch = epoch;
                 simConnection.Step = step;
-                simConnection.Poll = true;
             }
+
+            std::this_thread::sleep_for(std::chrono::seconds(2));
+
+            toRet["EventString"] = picojson::value("NEW_EPOCH");
+            toRet["Species"] = picojson::value(GameSimUtils::GetSpecies(mSimServerCfg, sd.SimulationServerId, epoch));
+            toRet["Environment"] =  picojson::value(GameSimUtils::GetEnvironment(mSimServerCfg, sd.SimulationServerId, epoch));
         }
         else if (command == "POLL")
         {
             picojson::array toSend;
             auto& simConnection = mConnections[sd.SimulationServerId];
             {
-                std::lock_guard<std::mutex>(*simConnection.Lock);
-                while(!simConnection.StepsToSend.empty() && 
-                      toSend.size() < 100) // The queue isn't empty or 100 steps, we don't want to overload pipes
+                int step = simConnection.Step;
+                int epoch = simConnection.Epoch;
+
                 {
-                    // Write the steps into the result json
-                    auto step = simConnection.StepsToSend.front();
-                    simConnection.StepsToSend.pop();
-                    toSend.push_back(step);
-                    std::cout << toSend.size() << " " << simConnection.StepsToSend.size() << std::endl;
+                    auto res = GameSimUtils::GetSimulationSteps(mSimServerCfg, sd.SimulationServerId, epoch, step, 50); 
+                    for(auto r : res)
+                    {
+                        toSend.push_back(r);
+                    }
                 }
+
+                simConnection.Step = step;
             }
+            toRet["EventString"] = picojson::value("STEP_POLL");
             toRet["Steps"] = picojson::value(toSend);
         }
 
-        std::cout << " Returning Creatur Obs: " << std::endl;
+        std::cout << " Returning Creature Obs: " << std::endl;
         return std::move(toRet);
     }
 }
-

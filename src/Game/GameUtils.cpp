@@ -88,7 +88,7 @@ namespace GameSimUtils
         auto create = JsonHelpers::json_get_object(createResp_v, "Response");
         return create;
     }
-    picojson::array GetSimulationSteps(const PolyminisServer::ServerCfg& simServerCfg, int simSessionId, int& inout_epoch, int& inout_start_at_step)
+    picojson::array GetSimulationSteps(const PolyminisServer::ServerCfg& simServerCfg, int simSessionId, int& inout_epoch, int& inout_startAtStep, int maxSteps)
     {
         picojson::array steps;
         int latest_step = 0;
@@ -107,13 +107,13 @@ namespace GameSimUtils
         auto epochsResp_v = picojson::value(epochsResp);
         auto epochs = JsonHelpers::json_get_object(epochsResp_v, "Response");
 
-        latest_step = (int)JsonHelpers::json_get_as_float(epochs["Steps"]);
+        latest_step = std::min((int)JsonHelpers::json_get_as_float(epochs["Steps"]), (inout_startAtStep + maxSteps));
         
-        while(inout_start_at_step < latest_step)
+        while(inout_startAtStep < latest_step)
         {
             picojson::object stepResp = PolyminisServer::HttpClient::Request(simServerCfg.host,
                                                                              simServerCfg.port,
-                                                                             epoch_url+"/steps/"+std::to_string(inout_start_at_step)+"/",
+                                                                             epoch_url+"/steps/"+std::to_string(inout_startAtStep)+"/",
                                                                              PolyminisServer::HttpMethod::GET,
                                                                              picojson::object());
             auto stepResp_v = picojson::value(stepResp);
@@ -121,10 +121,37 @@ namespace GameSimUtils
 
             steps.push_back(picojson::value(step));
 
-            inout_start_at_step++;
+            inout_startAtStep++;
         }
 
         return steps;
+    }
+
+
+    picojson::array GetSpecies(const PolyminisServer::ServerCfg& simServerCfg, int simSessionId, int epoch)
+    {
+        auto url = "/simulations/"+std::to_string(simSessionId)+"/epochs/"+std::to_string(epoch)+"/species";
+        picojson::object speciesResp = PolyminisServer::HttpClient::Request(simServerCfg.host,
+                                                                            simServerCfg.port,
+                                                                            url,
+                                                                            PolyminisServer::HttpMethod::GET,
+                                                                            picojson::object());
+        auto speciesResp_v = picojson::value(speciesResp);  
+        auto species = JsonHelpers::json_get_object(speciesResp_v, "Response");  
+        return JsonHelpers::json_get_array(picojson::value(species), "Species");
+
+    }
+    picojson::object GetEnvironment(const PolyminisServer::ServerCfg& simServerCfg, int simSessionId, int epoch)
+    {
+        auto url = "/simulations/"+std::to_string(simSessionId)+"/epochs/"+std::to_string(epoch)+"/environment";
+        picojson::object envResp = PolyminisServer::HttpClient::Request(simServerCfg.host,
+                                                                        simServerCfg.port,
+                                                                        url,
+                                                                        PolyminisServer::HttpMethod::GET,
+                                                                        picojson::object());
+        auto envResp_v = picojson::value(envResp);  
+        auto env = JsonHelpers::json_get_object(envResp_v, "Response");  
+        return JsonHelpers::json_get_object(picojson::value(env), "Environment");
     }
 
     picojson::object RunSimulation(const PolyminisServer::ServerCfg& simServerCfg, const PolyminisServer::ServerCfg& almanacServerCfg, const picojson::object& masterTT,
@@ -153,11 +180,11 @@ namespace GameSimUtils
         dimObj["y"] = picojson::value(100.0);
 
         envObj["Dimensions"] = picojson::value(dimObj);
-        envObj["SpeciesSlots"] = picojson::value((double)2);
+        envObj["SpeciesSlots"] = picojson::value((double)3);
 
         epochObj["Environment"] = picojson::value(envObj);
         epochObj["MaxSteps"] = picojson::value((double)50);
-        epochObj["Restarts"] = picojson::value((double)1);
+        epochObj["Restarts"] = picojson::value((double)0);
         epochObj["Substeps"] = picojson::value((double)4);
         epochObj["Proportions"] = picojson::value(picojson::array());
 
