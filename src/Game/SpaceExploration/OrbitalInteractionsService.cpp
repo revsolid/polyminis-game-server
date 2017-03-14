@@ -104,6 +104,7 @@ namespace SpaceExploration
                 picojson::object newSpeciesPayload;
                 auto splices = picojson::value(JsonHelpers::json_get_array(picojson::value(speciesJson), "Splices"));
                 newSpeciesPayload["Splices"] = splices;
+                newSpeciesPayload["InstinctTuning"] = picojson::value(JsonHelpers::json_get_object(picojson::value(speciesJson), "InstinctTuning"));
                 newSpeciesPayload["TranslationTable"] = mGameRules.CreateTranslationTable(splices);
                 std::string url = "/persistence/speciessummaries/"+planetEpoch+"/"+speciesName;
                 PolyminisServer::HttpClient::Request(mAlmanacServerCfg.host, mAlmanacServerCfg.port, url,
@@ -163,6 +164,7 @@ namespace SpaceExploration
                     newSpeciesPayload["CreatorName"] = picojson::value(sd.UserName);
                     auto splices = picojson::value(JsonHelpers::json_get_array(picojson::value(speciesJson), "Splices"));
                     newSpeciesPayload["Splices"] = splices;
+                    newSpeciesPayload["InstinctTuning"] = picojson::value(JsonHelpers::json_get_object(picojson::value(speciesJson), "InstinctTuning"));
                     newSpeciesPayload["TranslationTable"] = mGameRules.CreateTranslationTable(splices);
                     std::string url = "/persistence/speciesinplanet/"+planetEpoch+"/"+speciesName;
                     PolyminisServer::HttpClient::Request(mAlmanacServerCfg.host, mAlmanacServerCfg.port, url,
