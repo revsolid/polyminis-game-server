@@ -2,6 +2,8 @@
 #include "Core/HttpClient.h"
 #include "GameUtils.h"
 
+#include <thread>
+
 namespace GameDBUtils
 {
     bool SaveBiomassValue(const PolyminisServer::SessionData& session, const PolyminisServer::ServerCfg& almanacServerCfg)
@@ -112,8 +114,6 @@ namespace GameSimUtils
         int latest_step = 0;
 
         // Check in /epochs
-
-
         auto epoch_url = "/simulations/"+std::to_string(simSessionId)+"/epochs/"+std::to_string(inout_epoch);
 
         picojson::object epochsResp = PolyminisServer::HttpClient::Request(simServerCfg.host,
@@ -146,19 +146,34 @@ namespace GameSimUtils
     }
 
 
+#define MAX_RETRIES 10
     picojson::array GetSpecies(const PolyminisServer::ServerCfg& simServerCfg, int simSessionId, int epoch)
     {
         auto url = "/simulations/"+std::to_string(simSessionId)+"/epochs/"+std::to_string(epoch)+"/species";
-        picojson::object speciesResp = PolyminisServer::HttpClient::Request(simServerCfg.host,
-                                                                            simServerCfg.port,
-                                                                            url,
-                                                                            PolyminisServer::HttpMethod::GET,
-                                                                            picojson::object());
-        auto speciesResp_v = picojson::value(speciesResp);  
-        auto species = JsonHelpers::json_get_object(speciesResp_v, "Response");  
-        return JsonHelpers::json_get_array(picojson::value(species), "Species");
+        for(int retries = 0; retries < MAX_RETRIES; retries++)
+        {
+            picojson::object speciesResp = PolyminisServer::HttpClient::Request(simServerCfg.host,
+                                                                                simServerCfg.port,
+                                                                                url,
+                                                                                PolyminisServer::HttpMethod::GET,
+                                                                                picojson::object());
 
+            auto speciesResp_v = picojson::value(speciesResp);  
+
+            if (404 == JsonHelpers::json_get_int(speciesResp_v, "Status"))
+            {
+                std::cout << "Looping due to 404" << std::endl;
+                // Not Found 
+                std::this_thread::sleep_for(std::chrono::seconds(2));
+                continue;
+            }
+
+            auto species = JsonHelpers::json_get_object(speciesResp_v, "Response");  
+            return JsonHelpers::json_get_array(picojson::value(species), "Species");
+        }
+        return picojson::array();
     }
+
     picojson::object GetEnvironment(const PolyminisServer::ServerCfg& simServerCfg, int simSessionId, int epoch)
     {
         auto url = "/simulations/"+std::to_string(simSessionId)+"/epochs/"+std::to_string(epoch)+"/environment";

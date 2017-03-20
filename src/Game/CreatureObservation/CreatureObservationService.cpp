@@ -98,8 +98,6 @@ namespace CreatureObservation
                 simConnection.Step = step;
             }
 
-            std::this_thread::sleep_for(std::chrono::seconds(2));
-
             toRet["EventString"] = picojson::value("NEW_EPOCH");
             toRet["Species"] = picojson::value(GameSimUtils::GetSpecies(mSimServerCfg, sd.SimulationServerId, epoch));
             toRet["Environment"] =  picojson::value(GameSimUtils::GetEnvironment(mSimServerCfg, sd.SimulationServerId, epoch));
@@ -113,7 +111,7 @@ namespace CreatureObservation
                 int epoch = simConnection.Epoch;
 
                 {
-                    auto res = GameSimUtils::GetSimulationSteps(mSimServerCfg, sd.SimulationServerId, epoch, step, 50); 
+                    auto res = GameSimUtils::GetSimulationSteps(mSimServerCfg, sd.SimulationServerId, epoch, step, 10); 
                     for(auto r : res)
                     {
                         toSend.push_back(r);

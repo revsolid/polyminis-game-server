@@ -74,14 +74,16 @@ picojson::object HttpClient::Request(const std::string& host, int port,
 
     picojson::value v;
     std::string body = to_string(resp.body.data());
+    picojson::object obj;
+    obj["Status"] = picojson::value((double)resp.status);
+
     std::string err = picojson::parse(v, body);
     if (!err.empty())        
     {
         // ERROR
         std::cout << "HttpClient - Error Parsing Message Body: " << body << std::endl;
-        return std::move(picojson::object());
+        return std::move(obj);
     }
-    picojson::object obj;
     obj["Response"] = std::move(v);
     return std::move(obj);
 }
