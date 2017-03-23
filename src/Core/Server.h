@@ -33,7 +33,7 @@ namespace PolyminisServer
         int         SimulationServerId = SIM_SERVER_ID_INVALID;
 
         float       BiomassAvailable;
-        float       VisibilityRange = 600.0f;
+        float       VisibilityRange = 1200.0f;
         Coord       Position; 
     };
     
