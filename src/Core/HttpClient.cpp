@@ -5,6 +5,37 @@
 #include "HttpClient.h"
 
 using namespace PolyminisServer;
+
+
+std::string HttpMethodToString(HttpMethod method)
+{
+    std::string toRet = "GET";
+    switch(method)
+    {
+    case HttpMethod::POST:
+        toRet = "POST";
+        break;
+
+    case HttpMethod::PUT:
+        toRet = "PUT";
+        break;
+
+    case HttpMethod::DELETE:
+        toRet = "DELETE";
+        break;
+
+    case HttpMethod::GET:
+    // Fallthrough
+    default:
+        toRet = "GET";
+        break;
+    }
+
+    return toRet;
+}
+
+
+
 picojson::object HttpClient::Request(const std::string& host, int port,
                                      const std::string& url, HttpMethod method,
                                      const picojson::object& payload)
@@ -12,7 +43,7 @@ picojson::object HttpClient::Request(const std::string& host, int port,
     boost::asio::io_service ios;
     boost::asio::ip::tcp::resolver r{ios};
     boost::asio::ip::tcp::socket sock{ios};
-    std::cout << "HttpClient::Connecting to " << host << ":" << port << url << std::endl;
+    std::cout << "HttpClient::Connecting to " << host << ":" << port << url << " (" << HttpMethodToString(method) << ")"<< std::endl;
     try
     {
         boost::asio::connect(sock,
@@ -27,27 +58,7 @@ picojson::object HttpClient::Request(const std::string& host, int port,
 
     beast::http::request<beast::http::string_body> req;
 
-    switch(method)
-    {
-    case HttpMethod::POST:
-        req.method = "POST";
-        break;
-
-    case HttpMethod::PUT:
-        req.method = "PUT";
-        break;
-
-    case HttpMethod::DELETE:
-        req.method = "DELETE";
-        break;
-
-    case HttpMethod::GET:
-    // Fallthrough
-    default:
-        req.method = "GET";
-        break;
-    }
-
+    req.method = HttpMethodToString(method); 
     req.url = std::string(url);
     req.version = 11;
 
@@ -60,18 +71,19 @@ picojson::object HttpClient::Request(const std::string& host, int port,
     beast::streambuf sb;
     beast::http::response<beast::http::streambuf_body> resp;
     beast::http::read(sock, sb, resp);
-    std::cout << resp << std::endl;
 
     picojson::value v;
     std::string body = to_string(resp.body.data());
+    picojson::object obj;
+    obj["Status"] = picojson::value((double)resp.status);
+
     std::string err = picojson::parse(v, body);
     if (!err.empty())        
     {
         // ERROR
-        std::cout << "Error Parsing Message: " << body << std::endl;
-        return std::move(picojson::object());
+        std::cout << "HttpClient - Error Parsing Message Body: " << body << std::endl;
+        return std::move(obj);
     }
-    picojson::object obj;
     obj["Response"] = std::move(v);
     return std::move(obj);
 }

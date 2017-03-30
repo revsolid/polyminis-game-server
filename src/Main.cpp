@@ -43,9 +43,9 @@ int main()
         std::cout << "Adding User Service..." << std::endl;
         User::UserService userService(server, almanacServer);
 
-        CreatureObservation::SimulationServerConfig simServerCfg { std::string("localhost"), 8080 };
+        CreatureObservation::SimulationServerConfig simServerCfg { std::string("localhost"), 8082 };
         std::cout << "Adding Creature Observation..." << std::endl;
-        CreatureObservation::CreatureObservationService creatureObs(server, simServerCfg);
+        CreatureObservation::CreatureObservationService creatureObs(server, simServerCfg, almanacServer, gameRules);
 
         std::cout << "Adding Inventory Service..." << std::endl;
         Inventory::InventoryService inventory(server, almanacServer, gameRules);

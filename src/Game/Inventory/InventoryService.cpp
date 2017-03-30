@@ -74,6 +74,7 @@ namespace Inventory
 
             if (command == "RESEARCH")
             {
+                epoch = GameDBUtils::GetGlobalEpoch(mAlmanacServerCfg);
                 invEntry["InventoryType"] = picojson::value("Research");
                 invEntry["Value"] = picojson::value(CreateResearchPayload(speciesData, pid, epoch, speciesName, sd));
             }  
@@ -84,7 +85,7 @@ namespace Inventory
 
                 if (command == "SAMPLE_FROM_PLANET")
                 {
-                    speciesData = picojson::value(GameUtils::GetSpeciesFullData(mAlmanacServerCfg, planetEpoch, speciesName));
+                    speciesData = picojson::value(GameDBUtils::GetSpeciesInPlanet(mAlmanacServerCfg, planetEpoch, speciesName));
                 }
                 invEntry["Value"] = picojson::value(CreateSpeciesSeedPayload(speciesData, planetEpoch, speciesName, new_species, sd));
             }
@@ -116,6 +117,14 @@ namespace Inventory
                                                  PolyminisServer::HttpMethod::PUT, invPayload);
         
             return_inventory = true;
+        }
+        else if (command == "GET_GLOBAL_EPOCH")
+        {
+            toRet["EventString"] = picojson::value("ReceiveGlobalEpoch");
+            toRet["Epoch"] = picojson::value((double)GameDBUtils::GetGlobalEpoch(mAlmanacServerCfg));
+            // hacky stuff to get a progress bar showing.
+            return std::move(toRet);
+
         }
         else if (command == "DELETE_ENTRY")
         {
@@ -203,6 +212,7 @@ namespace Inventory
         }
     //    payload["InstinctTuning"] = picojson::value(JsonHelpers::json_get_object(speciesData, "InstinctTuning"));
         payload["Splices"] = picojson::value(JsonHelpers::json_get_array(speciesData, "Splices"));
+        payload["InstinctTuning"] = picojson::value(JsonHelpers::json_get_object(speciesData, "InstinctTuning"));
 
         return std::move(payload);
     }

@@ -77,6 +77,7 @@ Planet::Planet(const picojson::value& planetJson, int nextID)
     mTemperature = Range<float>(t_min, t_max);
     mPh = Range<float>(ph_min, ph_max);
     mName = std::string(name);
+    mEpoch = epoch;
 }
 
 Coord Planet::GetPos() const { return mPosition; }
@@ -157,7 +158,8 @@ picojson::object Planet::ToJson()
         species_obj["Percentage"]  = picojson::value(s.Percentage);
         species_arr.push_back(picojson::value(species_obj));
     }
-        
+
     obj["Species"] = picojson::value(species_arr);
+    obj["Epoch"] = picojson::value((double)mEpoch);
     return obj;
 }

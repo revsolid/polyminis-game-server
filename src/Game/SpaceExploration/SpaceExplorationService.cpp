@@ -41,7 +41,7 @@ namespace SpaceExploration
                 int   pid = mPlanetManager.GetNextPlanetId();
                 Planet planetModel(planet, pid);
 
-                auto all_species_in_planet = GameUtils::GetSpeciesInPlanet(mAlmanacServerCfg,
+                auto all_species_in_planet = GameDBUtils::GetAllSpeciesInPlanet(mAlmanacServerCfg,
                                                                            std::to_string(planetModel.GetID())+std::to_string(planetModel.GetEpoch()));
                 
                 for (auto summary : all_species_in_planet)
@@ -111,7 +111,7 @@ namespace SpaceExploration
                 sd.BiomassAvailable -= warpCost;
                 to_ret["NewBiomassAvailable"] = picojson::value(sd.BiomassAvailable); 
 
-                GameUtils::SaveBiomassValue(sd, mAlmanacServerCfg);
+                GameDBUtils::SaveBiomassValue(sd, mAlmanacServerCfg);
             }
             else
             {

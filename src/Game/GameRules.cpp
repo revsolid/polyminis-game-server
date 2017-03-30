@@ -17,11 +17,6 @@ namespace PolyminisGameRules
         return (y1*a + y0*b);
     }
 
-    GameRules::GameRules(const std::string& filePath)
-    {
-        //
-        LoadFromFile(filePath);
-    }
     GameRules::GameRules(const picojson::value& config)
     {
         //
@@ -86,41 +81,13 @@ namespace PolyminisGameRules
         GenericSetCurve(B2PCurveEvals, curveSliceKeyframes);
     }
 
-    void GameRules::LoadFromFile(std::string path)
-    {
-        std::ifstream configFile;
-        configFile.open(path);
-
-        std::string line;
-        std::string fileContent("");
-        if (configFile.is_open())
-        {
-            while (getline(configFile,line))
-            {
-              fileContent += line;
-            }
-            configFile.close();
-        }
-        else
-        {
-            std::cout << "Error openning Config File: " << path << std::endl;
-            return;
-        }
-
-        picojson::value loadedObj;
-        std::cout << "Loaded From the Rules File: " << fileContent << std::endl;
-        picojson::parse(loadedObj, fileContent);
-
-        LoadFromJsonObj(loadedObj);
-    }
-
     void GameRules::ReloadFromJson(const picojson::value& config)
     {
         LoadFromJsonObj(config);
     }
     void GameRules::LoadFromJsonObj(const picojson::value& config)
     {
-        //TODO: This needs a lock right here <<->>
+        std::lock_guard<std::mutex>(*GameRulesLock);
         if (JsonHelpers::json_has_field(config, "BaseWarpCost"))
             BaseWarpCost = JsonHelpers::json_get_float(config, "BaseWarpCost");
         if (JsonHelpers::json_has_field(config, "WarpCostMultiplier"))
@@ -141,6 +108,46 @@ namespace PolyminisGameRules
 
         if (JsonHelpers::json_has_field(config, "PercentageToBiomassCostCurve"))
             P2BAnimationCurveSerialized = picojson::value(JsonHelpers::json_get_object(config, "PercentageToBiomassCostCurve")).serialize();
+
+
+        if (JsonHelpers::json_has_field(config, "SpliceData"))
+        {
+            SpliceData.clear();
+            //
+            auto splices = JsonHelpers::json_get_array(config, "SpliceData"); 
+            
+            for (auto s : splices) 
+            {
+                std::string s_key = JsonHelpers::json_get_string(s, "InternalName");
+                SpliceData[s_key] = s;
+            }
+        }
+
+        if (JsonHelpers::json_has_field(config, "TraitData"))
+        {
+            TraitData.clear();
+            //
+            auto traits = JsonHelpers::json_get_array(config, "TraitData"); 
+            
+            for (auto t : traits) 
+            {
+                std::string t_key = JsonHelpers::json_get_string(t, "InternalName");
+                TraitData[t_key] = t;
+            }
+        }
+
+        if (JsonHelpers::json_has_field(config, "DefaultTraits"))
+        {
+            DefaultTraits.clear();     
+            auto dtraits = JsonHelpers::json_get_array(config, "DefaultTraits");
+
+            for (auto dt : dtraits)
+            {
+                std::string dt_key = JsonHelpers::json_get_as_string(dt);
+
+                DefaultTraits.push_back(TraitData[dt_key]);
+            }
+        }
     }
 
     void GameRules::ReloadFromDB(const PolyminisServer::ServerCfg& almanacServerCfg)
@@ -166,24 +173,6 @@ namespace PolyminisGameRules
         {
             std::cout << e.what() << std::endl;
         }
-    }
-
-    bool GameRules::SaveIntoFile(std::string filePath)
-    {
-        //
-        std::ofstream configFile;
-        configFile.open(filePath);
-        auto config = SerializeRules();
-        if (configFile.is_open())
-        {
-            configFile << config.serialize(); 
-            configFile.close();
-        }
-        else
-        {
-            return false;
-        }
-        return true;
     }
 
     bool GameRules::SaveToDB(const PolyminisServer::ServerCfg& almanacServerCfg)
@@ -218,11 +207,6 @@ namespace PolyminisGameRules
         config["BiomassToPercentageCurveKeyframes"] = keyframeSerializer(B2PCurveEvals);
         config["VERSION"] = picojson::value(GAME_RULES_VERSION);
 
-        picojson::value curveObj;
-        picojson::parse(curveObj, WCAnimationCurveSerialized);
-        // An error here would be REALLY weird...
-
-        config["WarpCostCurve"] = curveObj;
         config["BaseWarpCost"] = picojson::value(BaseWarpCost);
         config["WarpCostMultiplier"] = picojson::value(WarpCostMultiplier);
         config["MaxWarpDistance"] = picojson::value(MaxWarpDistance);
@@ -284,5 +268,44 @@ namespace PolyminisGameRules
     float GameRules::EvalBiomassToPercentageCurve(float t)
     {
         return GenericEval(B2PCurveEvals, t);
+    }
+
+    picojson::value GameRules::CreateTranslationTable(const picojson::value& splices)
+    {
+        auto splices_arr = JsonHelpers::json_get_as_array(splices);
+
+        picojson::array enabledTraits;
+        for (auto s : splices_arr)
+        {
+            auto sName = JsonHelpers::json_get_string(s, "InternalName");
+            auto sData = SpliceData[sName];
+
+            auto traits = JsonHelpers::json_get_array(sData, "Traits");
+            for (auto t : traits)
+            {
+                auto tName = JsonHelpers::json_get_as_string(t);
+                auto trait = TraitData[tName];
+                picojson::object trait_json; 
+                trait_json["Number"] = picojson::value(JsonHelpers::json_get_float(trait, "TID"));
+                trait_json["Tier"] = picojson::value(JsonHelpers::json_get_string(trait, "Tier"));
+                enabledTraits.push_back(picojson::value(trait_json));
+            }
+        }
+
+        for (auto trait : DefaultTraits)
+        {
+            picojson::object trait_json; 
+            trait_json["Number"] = picojson::value(JsonHelpers::json_get_float(trait, "TID"));
+            trait_json["Tier"] = picojson::value(JsonHelpers::json_get_string(trait, "Tier"));
+            enabledTraits.push_back(picojson::value(trait_json));
+        }
+
+        std::cout << picojson::value(enabledTraits).serialize() << std::endl;
+        return picojson::value(enabledTraits);
+    }
+
+    const picojson::object& GameRules::GetTraitData() const
+    {
+        return TraitData;
     }
 }

@@ -70,6 +70,28 @@ namespace JsonHelpers
         return (int)it->second.get<double>();
     }
 
+    bool json_get_bool(const picojson::value& v, const std::string& fieldname)
+    {
+        //check if the type of the value is "object"
+        if (! v.is<picojson::object>())
+        {
+            // ERROR
+            std::cout << "Error value is not an object (json_get_int)" << std::endl;
+            return false;
+        }
+        // obtain a const reference to the map
+        const picojson::value::object& obj = v.get<picojson::object>();
+        auto it = obj.find(fieldname);
+        if (it == obj.end())
+        {
+           // ERROR 
+           std::cout << "Error field: "<< fieldname << " not found" << std::endl;
+           return false;
+        }
+
+        return (bool)it->second.get<bool>();
+    }
+
     const picojson::object& json_get_object(const picojson::value& v, const std::string& fieldname)
     {
         if (! v.is<picojson::object>())
@@ -98,7 +120,7 @@ namespace JsonHelpers
         if (! v.is<picojson::object>())
         {
             // ERROR
-            std::cout << "Error value is not an object (json_get_object)" << std::endl;
+            std::cout << "Error value is not an object (json_get_as_object)" << std::endl;
             return Empty;
         }
         return v.get<picojson::object>();
@@ -109,10 +131,34 @@ namespace JsonHelpers
     {
         if (!v.is<double>())
         {
-            std::cout << "Error value is not an object (json_get_object)" << std::endl;
+            std::cout << "Error value is not a float (json_get_as_float)" << std::endl;
             return 0.0;
         }
         return (float) v.get<double>();
+    }
+
+
+    std::string json_get_as_string(const picojson::value& v)
+    {
+        if (! v.is<std::string>())
+        {
+            // ERROR
+            std::cout << "Error value is not a string (json_get_as_string)" << std::endl;
+            return "";
+        }
+        return v.to_str();
+    }
+
+
+    const picojson::array& json_get_as_array(const picojson::value& v)
+    {
+        if (! v.is<picojson::array>() )
+        {
+            // ERROR
+            std::cout << "Error value is not an object (json_get_as_array)" << std::endl;
+            return EmptyArray;
+        }
+        return v.get<picojson::array>();
     }
 
     const picojson::array& json_get_array(const picojson::value& v, const std::string& fieldname)
