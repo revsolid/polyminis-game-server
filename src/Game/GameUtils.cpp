@@ -200,7 +200,7 @@ namespace GameSimUtils
         picojson::object epochObj;
         picojson::array sensorList;
 
-        auto v = {"positionx","positiony","orientation","lastmovesucceded"};
+        auto v = {"positionx","positiony","orientation","lastmovesucceded","timeglobal", "timesubstep"};
         for (auto s : v)
         {
             sensorList.push_back(picojson::value(s));
@@ -217,7 +217,7 @@ namespace GameSimUtils
         envObj["AddBorder"] = picojson::value(true);
 
         epochObj["Environment"] = picojson::value(envObj);
-        epochObj["MaxSteps"] = picojson::value((double)50);
+        epochObj["MaxSteps"] = picojson::value((double)100);
         epochObj["Restarts"] = picojson::value((double)0);
         epochObj["Substeps"] = picojson::value((double)4);
         epochObj["Proportions"] = picojson::value(picojson::array());
@@ -227,8 +227,9 @@ namespace GameSimUtils
         simData["Epoch"] = picojson::value(epochObj);
 
         simData["EliteIndividuals"] = picojson::value(5.0f);
-        simData["MaxIndividuals"] = picojson::value(25.0f);
+        simData["MaxIndividuals"] = picojson::value(20.0f);
         simData["SimulationType"] = picojson::value("Creature Observation");
+        simData["ForceRestart"] = picojson::value(true);
 
         picojson::array flatMasterTT;
         for(auto kv : masterTT)

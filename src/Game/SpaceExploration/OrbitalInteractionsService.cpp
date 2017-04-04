@@ -43,7 +43,7 @@ namespace SpaceExploration
                 // update the Biomass of the player on the DB - To find the species we need
                 // to extend the almanac to support an extra query param on get
                 float percentageChange = JsonHelpers::json_get_float(request, "ExtractedPercentage");
-                float toExtract = PopulationPercentageToBiomass(percentageChange);
+                float toExtract = mGameRules.GetPercentageToBiomass(percentageChange);
 
                 auto speciesJson = JsonHelpers::json_get_object(request, "Species");
                 std::string speciesName = JsonHelpers::json_get_string(picojson::value(speciesJson), "SpeciesName");
@@ -123,7 +123,7 @@ namespace SpaceExploration
                 // Substract Percentage from them
                 // Add new species with percentage
                 float toDeploy = JsonHelpers::json_get_float(request, "DeployedBiomass");
-                float percentageForDeployed = BiomassToPopulationPercentage(toDeploy);
+                float percentageForDeployed = mGameRules.GetBiomassToPercentage(toDeploy);
 
                 auto speciesJson = JsonHelpers::json_get_object(request, "Species");
                 std::string speciesName = JsonHelpers::json_get_string(picojson::value(speciesJson), "SpeciesName");
@@ -142,14 +142,27 @@ namespace SpaceExploration
                     {
                         float oldPercentage = JsonHelpers::json_get_float(species_json, "Percentage");
                         float newPercentage = oldPercentage -  (oldPercentage * percentageForDeployed);
-
+                        std::cout << "Percentage Set for Planet " << planetEpoch << " Old Percentage: " << oldPercentage;
+                        std::cout  << " New Percentage: "<< newPercentage << std::endl;
+                        std::cout  << "Deploying: " << percentageForDeployed << std::endl;
                         std::string sName = JsonHelpers::json_get_string(species_json, "SpeciesName");
 
                         picojson::object xtractPayload;
-                        xtractPayload["Percentage"] = picojson::value(newPercentage);
+                        xtractPayload["Percentage"] = picojson::value((float)newPercentage);
                         std::string url = "/persistence/speciessummaries/"+planetEpoch+"/"+sName;
                         PolyminisServer::HttpClient::Request(mAlmanacServerCfg.host, mAlmanacServerCfg.port, url,
                                                              PolyminisServer::HttpMethod::PUT, xtractPayload);
+                    }
+
+                    picojson::array individuals;
+                    picojson::object config;
+                    {
+                        auto originalSpeciesName = JsonHelpers::json_get_string(picojson::value(speciesJson), "OriginalSpeciesName");
+                        auto originalPlanetEpoch = JsonHelpers::json_get_string(picojson::value(speciesJson), "PlanetEpoch");
+                        auto genPayload = GameDBUtils::GetSpeciesGeneticPayload(mAlmanacServerCfg, originalPlanetEpoch, originalSpeciesName);  
+
+                        config = JsonHelpers::json_get_object(picojson::value(genPayload), "GAConfiguration");
+                        individuals = JsonHelpers::json_get_array(picojson::value(genPayload), "Individuals");
                     }
 
                     sd.BiomassAvailable -= toDeploy;
@@ -164,8 +177,12 @@ namespace SpaceExploration
                     newSpeciesPayload["CreatorName"] = picojson::value(sd.UserName);
                     auto splices = picojson::value(JsonHelpers::json_get_array(picojson::value(speciesJson), "Splices"));
                     newSpeciesPayload["Splices"] = splices;
-                    newSpeciesPayload["InstinctTuning"] = picojson::value(JsonHelpers::json_get_object(picojson::value(speciesJson), "InstinctTuning"));
+                    newSpeciesPayload["InstinctWeights"] = picojson::value(JsonHelpers::json_get_object(picojson::value(speciesJson), "InstinctTuning"));
                     newSpeciesPayload["TranslationTable"] = mGameRules.CreateTranslationTable(splices);
+                    newSpeciesPayload["GAConfiguration"] = picojson::value(config);
+                    newSpeciesPayload["Individuals"] = picojson::value(individuals);
+
+
                     std::string url = "/persistence/speciesinplanet/"+planetEpoch+"/"+speciesName;
                     PolyminisServer::HttpClient::Request(mAlmanacServerCfg.host, mAlmanacServerCfg.port, url,
                                                          PolyminisServer::HttpMethod::POST, newSpeciesPayload);

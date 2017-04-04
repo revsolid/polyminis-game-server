@@ -44,8 +44,7 @@ namespace PolyminisGameRules
     }
     float GameRules::GetBiomassToPercentage(float biomass)
     {
-        //TODO: Some math missing
-        return biomass;
+        return biomass / 100.0;
     }
 
     void GenericSetCurve(std::vector<float> &curveValVec, const picojson::array& arr)

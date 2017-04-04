@@ -22,8 +22,5 @@ namespace SpaceExploration
         PolyminisServer::ServerCfg mAlmanacServerCfg;
         PlanetManager& mPlanetManager;
         PolyminisGameRules::GameRules& mGameRules;
-
-        float BiomassToPopulationPercentage(float biomass) { return biomass; }
-        float PopulationPercentageToBiomass(float percentage) { return percentage; }
     };
 }
