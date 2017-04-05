@@ -177,11 +177,13 @@ namespace SpaceExploration
                     newSpeciesPayload["CreatorName"] = picojson::value(sd.UserName);
                     auto splices = picojson::value(JsonHelpers::json_get_array(picojson::value(speciesJson), "Splices"));
                     newSpeciesPayload["Splices"] = splices;
-                    newSpeciesPayload["InstinctWeights"] = picojson::value(JsonHelpers::json_get_object(picojson::value(speciesJson), "InstinctTuning"));
+                    auto instinctTuning = picojson::value(JsonHelpers::json_get_object(picojson::value(speciesJson), "InstinctTuning"));
+                    newSpeciesPayload["InstinctTuning"] = instinctTuning;
                     newSpeciesPayload["TranslationTable"] = mGameRules.CreateTranslationTable(splices);
                     newSpeciesPayload["GAConfiguration"] = picojson::value(config);
                     newSpeciesPayload["Individuals"] = picojson::value(individuals);
 
+                    newSpeciesPayload["InstinctWeights"] = mGameRules.CreateInstinctWeights(instinctTuning);
 
                     std::string url = "/persistence/speciesinplanet/"+planetEpoch+"/"+speciesName;
                     PolyminisServer::HttpClient::Request(mAlmanacServerCfg.host, mAlmanacServerCfg.port, url,

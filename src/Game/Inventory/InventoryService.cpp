@@ -210,7 +210,6 @@ namespace Inventory
         {
             payload["GAConfiguration"] = picojson::value(JsonHelpers::json_get_object(speciesData, "GAConfiguration"));
         }
-    //    payload["InstinctTuning"] = picojson::value(JsonHelpers::json_get_object(speciesData, "InstinctTuning"));
         payload["Splices"] = picojson::value(JsonHelpers::json_get_array(speciesData, "Splices"));
         payload["InstinctTuning"] = picojson::value(JsonHelpers::json_get_object(speciesData, "InstinctTuning"));
 

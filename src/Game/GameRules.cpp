@@ -269,6 +269,26 @@ namespace PolyminisGameRules
         return GenericEval(B2PCurveEvals, t);
     }
 
+
+    picojson::value GameRules::CreateInstinctWeights(const picojson::value& tuningConfig)
+    {
+        picojson::object jsonObj;
+
+        // TODO: This needs some *serious* massaging:
+        auto instinctKeys = {"Predatory", "Herding", "Hoarding", "Nomadic"};
+
+        for (auto &i : instinctKeys)
+        {
+            float level = fmin(fmax(JsonHelpers::json_get_float(tuningConfig, std::string(i)+"Lvl"), 0), 8);
+
+            float instinctWeight = 1 + (level / 10.0);
+
+            jsonObj[i] = picojson::value(instinctWeight);
+        }
+
+        return picojson::value(jsonObj); 
+    }
+
     picojson::value GameRules::CreateTranslationTable(const picojson::value& splices)
     {
         auto splices_arr = JsonHelpers::json_get_as_array(splices);
