@@ -40,7 +40,7 @@ namespace PolyminisGameRules
     float GameRules::GetPercentageToBiomass(float percentage)
     {
         //TODO: Some math missing
-        return EvalPercentageToBiomassCurve(percentage / 100.0);
+        return EvalPercentageToBiomassCurve(percentage) * 100.0;
     }
     float GameRules::GetBiomassToPercentage(float biomass)
     {
