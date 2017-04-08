@@ -70,11 +70,23 @@ namespace SpaceExploration
                         std::cout << "Trying to substract more percentage than there is: " << oldPercentage << " - " << percentageChange << std::endl;
                         return JsonHelpers::json_create_error("Error - Trying to Substarct more Percentage than available");
                     }
-
-                    xtractPayload["Percentage"] = picojson::value(oldPercentage - percentageChange);
+                    float newPercentage = fmax(0.0, oldPercentage - percentageChange);
+                    xtractPayload["Percentage"] = picojson::value();
                     PolyminisServer::HttpClient::Request(mAlmanacServerCfg.host, mAlmanacServerCfg.port, url,
                                                          PolyminisServer::HttpMethod::PUT, xtractPayload);
-                    sd.BiomassAvailable += toExtract; 
+
+
+                    if (newPercentage < 0.01)
+                    {
+                        // Remove Species from planet
+                        PolyminisServer::HttpClient::Request(mAlmanacServerCfg.host, mAlmanacServerCfg.port, url,
+                                                             PolyminisServer::HttpMethod::DELETE, picojson::object());
+                        
+                        //
+                        // TODO: Record Extinction Event anything else?
+                    }
+
+                    sd.BiomassAvailable += toExtract;
 
                     GameDBUtils::SaveBiomassValue(sd, mAlmanacServerCfg); 
                     toRet["EventString"] = picojson::value("EXTRACT_RESULT");
