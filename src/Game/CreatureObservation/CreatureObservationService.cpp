@@ -120,8 +120,54 @@ namespace CreatureObservation
 
                 simConnection.Step = step;
             }
-            toRet["EventString"] = picojson::value("STEP_POLL");
-            toRet["Steps"] = picojson::value(toSend);
+
+            if (toSend.size() == 0)
+            {
+                toRet["EventString"] = picojson::value("SIM_DONE");
+            }
+            else
+            {
+                toRet["EventString"] = picojson::value("STEP_POLL");
+                toRet["Steps"] = picojson::value(toSend);
+            }
+        }
+        else if (command == "GET_STATS")
+        {
+            int pid = JsonHelpers::json_get_int(request, "PlanetId");
+            int epoch = JsonHelpers::json_get_int(request, "Epoch");
+
+            /* Break EpochStats into something Unity Serializer can consume */
+            auto epochStats = GameDBUtils::GetEpochStatistics(mAlmanacServerCfg, pid, epoch);
+
+            auto epochStatsAsArrays = picojson::object();
+
+            for (auto it = epochStats.begin(); it != epochStats.end(); it++)
+            {
+                if (it->first == "PlanetId")
+                {
+                    continue;
+                }
+                                
+                if (it->first == "EpochNum")
+                {
+                    epochStatsAsArrays["Epoch"] = it->second;
+                    continue;
+                }
+
+                auto stat = JsonHelpers::json_get_as_object(it->second);
+                auto statAsArray = picojson::array();
+                for (auto it_prime = stat.begin(); it_prime != stat.end(); it_prime++)
+                {
+                    auto entry = picojson::object(); 
+                    entry["SpeciesName"] = picojson::value(it_prime->first);
+                    entry["Value"] = picojson::value(JsonHelpers::json_get_as_float(it_prime->second));
+                    statAsArray.push_back(picojson::value(entry));
+                }
+                epochStatsAsArrays[it->first] = picojson::value(statAsArray);
+            }
+
+            toRet["EpochStats"] = picojson::value(epochStatsAsArrays);
+            toRet["EventString"] = picojson::value("EPOCH_STATS");
         }
 
         std::cout << " Returning Creature Obs: " << std::endl;
