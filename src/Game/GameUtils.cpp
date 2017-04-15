@@ -75,6 +75,21 @@ namespace GameDBUtils
         return GetSpeciesInPlanet_internal(almanacServerCfg, planetEpoch, speciesName, false);
     }
 
+    picojson::object GetEpochStatistics(const PolyminisServer::ServerCfg& almanacServerCfg, int planetId, int epoch)
+    {
+        std::string url = "/persistence/epochs/"+std::to_string(planetId)+"/"+std::to_string(epoch); 
+        picojson::object globalEpoch_resp = PolyminisServer::HttpClient::Request(almanacServerCfg.host,
+                                                                             almanacServerCfg.port,
+                                                                             url,
+                                                                             PolyminisServer::HttpMethod::GET,
+                                                                             picojson::object());
+        auto epoch_resp_v = picojson::value(globalEpoch_resp);
+        std::cout << epoch_resp_v.serialize() << std::endl;
+        auto epoch_stats = JsonHelpers::json_get_object(epoch_resp_v, "Response");
+
+        return epoch_stats;
+    }
+
     int GetGlobalEpoch(const PolyminisServer::ServerCfg& almanacServerCfg)
     {
         std::string url = "/persistence/epochcounter/V1";
@@ -90,7 +105,6 @@ namespace GameDBUtils
         return JsonHelpers::json_get_int(picojson::value(epoch), "Epoch");
 
     }
-
 
 }
 
@@ -200,7 +214,7 @@ namespace GameSimUtils
         picojson::object epochObj;
         picojson::array sensorList;
 
-        auto v = {"positionx","positiony","orientation","lastmovesucceded"};
+        auto v = {"positionx","positiony","orientation","lastmovesucceded","timeglobal", "timesubstep"};
         for (auto s : v)
         {
             sensorList.push_back(picojson::value(s));
@@ -217,7 +231,7 @@ namespace GameSimUtils
         envObj["AddBorder"] = picojson::value(true);
 
         epochObj["Environment"] = picojson::value(envObj);
-        epochObj["MaxSteps"] = picojson::value((double)50);
+        epochObj["MaxSteps"] = picojson::value((double)100);
         epochObj["Restarts"] = picojson::value((double)0);
         epochObj["Substeps"] = picojson::value((double)4);
         epochObj["Proportions"] = picojson::value(picojson::array());
@@ -227,8 +241,9 @@ namespace GameSimUtils
         simData["Epoch"] = picojson::value(epochObj);
 
         simData["EliteIndividuals"] = picojson::value(5.0f);
-        simData["MaxIndividuals"] = picojson::value(25.0f);
+        simData["MaxIndividuals"] = picojson::value(20.0f);
         simData["SimulationType"] = picojson::value("Creature Observation");
+        simData["ForceRestart"] = picojson::value(true);
 
         picojson::array flatMasterTT;
         for(auto kv : masterTT)

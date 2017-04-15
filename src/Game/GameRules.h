@@ -28,6 +28,7 @@ namespace PolyminisGameRules
         picojson::value SerializeRules();
 
         picojson::value CreateTranslationTable(const picojson::value& splices);
+        picojson::value CreateInstinctWeights(const picojson::value& splices);
 
     private:
         void SetWarpCostCurve(const picojson::value& wCC);

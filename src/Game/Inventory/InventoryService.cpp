@@ -186,20 +186,20 @@ namespace Inventory
 //
 // A Species Seed is the Translation Table + User Tunning (Instincts and GAParams) + A pointer to the Individuals of an original Species
 // this is to avoid duplication and manipulation of Individuals (The biggest payload in the system)
-// Once a creature is deployed (Copied into the SpeciesInPlanet Table, the Individuals Row is copied from the original Species)
+// Once a creature is deployed (Copied into the SpeciesInPlanet Table, the Individuals Column is copied from the original Species)
 // New creatures are seeded with 1 of few 'prebaked' creatures
         std::string speciesName = pSpeciesName;
         std::string planetEpoch = pPlanetEpoch;
-        std::string originalSpeciesName = speciesName;
+        std::string originalSpeciesName = JsonHelpers::json_get_string(speciesData, "OriginalSpeciesName");
 
         picojson::object payload;
 
         if (isNew)
         {  
             // Hardcoded a specific species
-            planetEpoch = "1414100"; 
+            planetEpoch = "99992"; 
+            originalSpeciesName = "WorldSeed2Species1";
             speciesName = JsonHelpers::json_get_string(speciesData, "SpeciesName");
-            originalSpeciesName = "Test Species 1A";
             payload["CreatorName"] = picojson::value(sd.UserName);
         }
 
@@ -210,7 +210,6 @@ namespace Inventory
         {
             payload["GAConfiguration"] = picojson::value(JsonHelpers::json_get_object(speciesData, "GAConfiguration"));
         }
-    //    payload["InstinctTuning"] = picojson::value(JsonHelpers::json_get_object(speciesData, "InstinctTuning"));
         payload["Splices"] = picojson::value(JsonHelpers::json_get_array(speciesData, "Splices"));
         payload["InstinctTuning"] = picojson::value(JsonHelpers::json_get_object(speciesData, "InstinctTuning"));
 

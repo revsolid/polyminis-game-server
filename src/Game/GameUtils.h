@@ -17,6 +17,12 @@ namespace GameDBUtils
 
     // These functions hit the SpeciesInPlanet db endpoint and will bring down ALL the data for the species, so use ONLY IF ALL THE DATA IS NEEDED 
     picojson::object GetSpeciesGeneticPayload(const PolyminisServer::ServerCfg& almanacServerCfg, const std::string& planetEpoch, const std::string& speciesName);
+
+    // These functions hit the Epoch db endpoint use these for statistics that span several epochs.
+    // It uses Planet as the Key and Epoch as the Range in Dynamo so querying several epochs on the same
+    // planet is super cheap
+    picojson::object GetEpochStatistics(const PolyminisServer::ServerCfg& almanacServerCfg, int planetId, int epoch);
+    
     
     int GetGlobalEpoch(const PolyminisServer::ServerCfg& almanacServerCfg);
 }
