@@ -25,6 +25,35 @@ namespace Inventory
         auto payload = JsonHelpers::json_get_as_object(request);
 
 
+        if (command == "GET_INVENTORY_STATIC")
+        {
+            picojson::object static_data; 
+
+
+            picojson::array splice_data;
+            for(auto splice = mGameRules.GetSpliceData().begin() ;
+                splice != mGameRules.GetSpliceData().end() ; 
+                splice++)
+            {
+                splice_data.push_back(splice->second);
+            }
+
+            static_data["SpliceData"] = picojson::value(splice_data); 
+
+            picojson::array trait_data;
+            for(auto trait = mGameRules.GetTraitData().begin() ;
+                trait != mGameRules.GetTraitData().end() ; 
+                trait++)
+            {
+                trait_data.push_back(trait->second);
+            }
+            static_data["TraitData"] = picojson::value(trait_data);
+            static_data["Service"] = picojson::value("inventory");
+            static_data["EventString"] = picojson::value("StaticDataReady");
+
+            return static_data; 
+        }
+
         if (payload.count("Slot") == 0)
         {
             return JsonHelpers::json_create_error("Error - Slot not sent");
@@ -32,8 +61,7 @@ namespace Inventory
         int slot  = JsonHelpers::json_get_int(request, "Slot");
 
         picojson::object toRet;
-        bool return_inventory = command == "GET_INVENTORY";
-
+        bool return_inventory = command == "GET_INVENTORY"; 
         toRet["Service"] = picojson::value("inventory");
         if (command == "SAMPLE_FROM_PLANET" || command == "RESEARCH" || command == "NEW_SPECIES")
         {
@@ -197,7 +225,7 @@ namespace Inventory
         if (isNew)
         {  
             // Hardcoded a specific species
-            planetEpoch = "99992"; 
+            planetEpoch = "99992";
             originalSpeciesName = "WorldSeed2Species1";
             speciesName = JsonHelpers::json_get_string(speciesData, "SpeciesName");
             payload["CreatorName"] = picojson::value(sd.UserName);

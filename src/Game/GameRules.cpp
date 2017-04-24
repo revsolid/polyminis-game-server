@@ -327,4 +327,9 @@ namespace PolyminisGameRules
     {
         return TraitData;
     }
+
+    const picojson::object& GameRules::GetSpliceData() const
+    {
+        return SpliceData;
+    }
 }

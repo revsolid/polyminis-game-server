@@ -219,6 +219,25 @@ namespace GameSimUtils
         {
             sensorList.push_back(picojson::value(s));
         }
+
+        picojson::object planet_data_resp = PolyminisServer::HttpClient::Request(almanacServerCfg.host,
+                                                                                 almanacServerCfg.port,
+                                                                                 "/persistence/planets/"+std::to_string(planetId),
+                                                                                 PolyminisServer::HttpMethod::GET,
+                                                                                 picojson::object());
+        auto planet_data_rv = picojson::value(planet_data_resp);
+        auto planet_data = JsonHelpers::json_get_object(planet_data_rv, "Response");
+        auto planetJson = picojson::value(planet_data);
+         
+        if (JsonHelpers::json_has_field(planetJson, "Temperature"))
+        {
+            envObj["Temperature"] = picojson::value(JsonHelpers::json_get_object(planetJson, "Temperature"));
+        }
+
+        if (JsonHelpers::json_has_field(planetJson, "Ph"))
+        {
+            envObj["Ph"] = picojson::value(JsonHelpers::json_get_object(planetJson, "Ph"));
+        }
         
         envObj["DefaultSensors"] = picojson::value(sensorList);
 

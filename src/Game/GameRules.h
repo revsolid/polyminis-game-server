@@ -66,7 +66,7 @@ namespace PolyminisGameRules
         float MaxWarpDistance;
 
 // Static Data
-        std::unordered_map<std::string, picojson::value> SpliceData;
+        picojson::object SpliceData;
         // Trait Data is a table from internal name to TierId and Number
         picojson::object TraitData;
         
