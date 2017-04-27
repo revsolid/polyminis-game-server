@@ -144,8 +144,8 @@ picojson::object Planet::ToJson()
 
     picojson::object ph_obj;
     auto ph = GetPhRange();
-    ph_obj["Min"] = picojson::value(temp.Min); 
-    ph_obj["Max"] = picojson::value(temp.Max);
+    ph_obj["Min"] = picojson::value(ph.Min); 
+    ph_obj["Max"] = picojson::value(ph.Max);
     obj["Ph"] = picojson::value(ph_obj);
 
     picojson::array species_arr;

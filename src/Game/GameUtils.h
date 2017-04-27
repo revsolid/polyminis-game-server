@@ -22,6 +22,8 @@ namespace GameDBUtils
     // It uses Planet as the Key and Epoch as the Range in Dynamo so querying several epochs on the same
     // planet is super cheap
     picojson::object GetEpochStatistics(const PolyminisServer::ServerCfg& almanacServerCfg, int planetId, int epoch);
+    void UpdateEpochStatistics(const PolyminisServer::ServerCfg& almanacServerCfg, const picojson::object& new_data,
+                                           int planetId, int epoch);
     
     
     int GetGlobalEpoch(const PolyminisServer::ServerCfg& almanacServerCfg);

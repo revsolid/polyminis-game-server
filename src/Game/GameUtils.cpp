@@ -78,16 +78,28 @@ namespace GameDBUtils
     picojson::object GetEpochStatistics(const PolyminisServer::ServerCfg& almanacServerCfg, int planetId, int epoch)
     {
         std::string url = "/persistence/epochs/"+std::to_string(planetId)+"/"+std::to_string(epoch); 
-        picojson::object globalEpoch_resp = PolyminisServer::HttpClient::Request(almanacServerCfg.host,
-                                                                             almanacServerCfg.port,
-                                                                             url,
-                                                                             PolyminisServer::HttpMethod::GET,
-                                                                             picojson::object());
-        auto epoch_resp_v = picojson::value(globalEpoch_resp);
+        picojson::object epochStats_resp = PolyminisServer::HttpClient::Request(almanacServerCfg.host,
+                                                                                almanacServerCfg.port,
+                                                                                url,
+                                                                                PolyminisServer::HttpMethod::GET,
+                                                                                picojson::object());
+        auto epoch_resp_v = picojson::value(epochStats_resp);
         std::cout << epoch_resp_v.serialize() << std::endl;
         auto epoch_stats = JsonHelpers::json_get_object(epoch_resp_v, "Response");
 
         return epoch_stats;
+    }
+
+    void UpdateEpochStatistics(const PolyminisServer::ServerCfg& almanacServerCfg, const picojson::object& new_data,
+                               int planetId, int epoch)
+    {
+        std::string url = "/persistence/epochs/"+std::to_string(planetId)+"/"+std::to_string(epoch); 
+        picojson::object globalEpoch_resp = PolyminisServer::HttpClient::Request(almanacServerCfg.host,
+                                                                                 almanacServerCfg.port,
+                                                                                 url,
+                                                                                 PolyminisServer::HttpMethod::POST,
+                                                                                 new_data);
+
     }
 
     int GetGlobalEpoch(const PolyminisServer::ServerCfg& almanacServerCfg)
@@ -248,6 +260,8 @@ namespace GameSimUtils
         envObj["Dimensions"] = picojson::value(dimObj);
         envObj["SpeciesSlots"] = picojson::value((double)3);
         envObj["AddBorder"] = picojson::value(true);
+        envObj["UseWorldBuilder"] = picojson::value(true);
+        envObj["BorderMargin"] = picojson::value(5.0);
 
         epochObj["Environment"] = picojson::value(envObj);
         epochObj["MaxSteps"] = picojson::value((double)100);

@@ -9,6 +9,7 @@ PlanetManager::PlanetManager(const std::initializer_list<std::pair<float, float>
         unsigned int id = GetNextPlanetId();
         mPlanets.push_back(Planet(i.first, i.second, id));
     }
+    std::cout << "WHAT!?" << std::endl;
 }    
 
 Planet& PlanetManager::GetPlanet(unsigned int inId)

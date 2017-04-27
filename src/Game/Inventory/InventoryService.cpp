@@ -231,6 +231,11 @@ namespace Inventory
             payload["CreatorName"] = picojson::value(sd.UserName);
         }
 
+        if (originalSpeciesName == "")
+        {
+            originalSpeciesName = speciesName;
+        }
+
         payload["SpeciesName"] = picojson::value(speciesName);
         payload["PlanetEpoch"] = picojson::value(planetEpoch);
         payload["OriginalSpeciesName"] = picojson::value(originalSpeciesName);

@@ -71,10 +71,15 @@ namespace SpaceExploration
                         return JsonHelpers::json_create_error("Error - Trying to Substarct more Percentage than available");
                     }
                     float newPercentage = fmax(0.0, oldPercentage - percentageChange);
-                    xtractPayload["Percentage"] = picojson::value();
+                    xtractPayload["Percentage"] = picojson::value(newPercentage);
                     PolyminisServer::HttpClient::Request(mAlmanacServerCfg.host, mAlmanacServerCfg.port, url,
                                                          PolyminisServer::HttpMethod::PUT, xtractPayload);
 
+                    picojson::object epochStatistics = GameDBUtils::GetEpochStatistics(mAlmanacServerCfg, pid, epoch);
+                    picojson::object percObj = JsonHelpers::json_get_object(picojson::value(epochStatistics), "Percentages");
+                    percObj[speciesName] = picojson::value((float)newPercentage);
+                    epochStatistics["Percentages"] = picojson::value(percObj);
+                    GameDBUtils::UpdateEpochStatistics(mAlmanacServerCfg, epochStatistics, pid, epoch);
 
                     if (newPercentage < 0.01)
                     {
@@ -150,10 +155,23 @@ namespace SpaceExploration
 
                     auto species_arr = GameDBUtils::GetAllSpeciesInPlanet(mAlmanacServerCfg, planetEpoch);
 
+                    picojson::object epochStatistics = GameDBUtils::GetEpochStatistics(mAlmanacServerCfg, pid, epoch);
+                    picojson::object percObj = JsonHelpers::json_get_object(picojson::value(epochStatistics), "Percentages");
+
+                    float currentTotalPercentage = 0.0;
+                    for (auto species_json : species_arr)
+                    {
+                        currentTotalPercentage += JsonHelpers::json_get_float(species_json, "Percentage");
+                    }
                     for (auto species_json : species_arr)
                     {
                         float oldPercentage = JsonHelpers::json_get_float(species_json, "Percentage");
                         float newPercentage = oldPercentage -  (oldPercentage * percentageForDeployed);
+                        if (currentTotalPercentage + percentageForDeployed < 1.0)
+                        {
+                            // Don't change percentages unless the planet is full
+                            newPercentage = oldPercentage;
+                        }
                         std::cout << "Percentage Set for Planet " << planetEpoch << " Old Percentage: " << oldPercentage;
                         std::cout  << " New Percentage: "<< newPercentage << std::endl;
                         std::cout  << "Deploying: " << percentageForDeployed << std::endl;
@@ -164,7 +182,12 @@ namespace SpaceExploration
                         std::string url = "/persistence/speciessummaries/"+planetEpoch+"/"+sName;
                         PolyminisServer::HttpClient::Request(mAlmanacServerCfg.host, mAlmanacServerCfg.port, url,
                                                              PolyminisServer::HttpMethod::PUT, xtractPayload);
+                        percObj[sName] = picojson::value((float)newPercentage);
                     }
+                    percObj[speciesName] = picojson::value(percentageForDeployed);
+
+                    epochStatistics["Percentages"] = picojson::value(percObj);
+                    GameDBUtils::UpdateEpochStatistics(mAlmanacServerCfg, epochStatistics, pid, epoch);
 
                     picojson::array individuals;
                     picojson::object config;

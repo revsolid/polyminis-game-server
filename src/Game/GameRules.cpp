@@ -86,6 +86,7 @@ namespace PolyminisGameRules
     }
     void GameRules::LoadFromJsonObj(const picojson::value& config)
     {
+        std::cout << "Loading Game Rules from JSON" << std::endl;
         std::lock_guard<std::mutex>(*GameRulesLock);
         if (JsonHelpers::json_has_field(config, "BaseWarpCost"))
             BaseWarpCost = JsonHelpers::json_get_float(config, "BaseWarpCost");
@@ -147,6 +148,7 @@ namespace PolyminisGameRules
                 DefaultTraits.push_back(TraitData[dt_key]);
             }
         }
+        std::cout << "Loading Game Rules from JSON... DONE" << std::endl;
     }
 
     void GameRules::ReloadFromDB(const PolyminisServer::ServerCfg& almanacServerCfg)

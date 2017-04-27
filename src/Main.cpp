@@ -30,9 +30,11 @@ int main()
 
         std::cout << "Loading Server-Wide Game Rules..." << std::endl;
         PolyminisGameRules::GameRules gameRules(almanacServer); 
-        std::cout << "  Done." << std::endl;
+        std::cout << "--  Done." << std::endl;
+    std::cout << "WHAT!?" << std::endl;
 
         PlanetManager pManager({});
+    std::cout << "WHAT!?" << std::endl;
 
         std::cout << "Adding Space Exploration..." << std::endl;
         SpaceExploration::SpaceExplorationService spaceEx(server, almanacServer, gameRules, pManager);
