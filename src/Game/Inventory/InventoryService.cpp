@@ -225,8 +225,13 @@ namespace Inventory
         if (isNew)
         {  
             // Hardcoded a specific species
-            planetEpoch = "99992";
-            originalSpeciesName = "WorldSeed2Species1";
+            planetEpoch = "314151030";
+            std::vector<std::string> seedOptions = { "Just", "Sant", "Rumilus" };
+
+            int index = speciesName.size() % seedOptions.size();
+
+            originalSpeciesName = seedOptions[index];
+
             speciesName = JsonHelpers::json_get_string(speciesData, "SpeciesName");
             payload["CreatorName"] = picojson::value(sd.UserName);
         }

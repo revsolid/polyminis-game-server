@@ -79,6 +79,8 @@ namespace SpaceExploration
                     picojson::object percObj = JsonHelpers::json_get_object(picojson::value(epochStatistics), "Percentages");
                     percObj[speciesName] = picojson::value((float)newPercentage);
                     epochStatistics["Percentages"] = picojson::value(percObj);
+                    epochStatistics["PlanetId"] = picojson::value((float)pid);
+                    epochStatistics["EpochNum"] = picojson::value((float)epoch);
                     GameDBUtils::UpdateEpochStatistics(mAlmanacServerCfg, epochStatistics, pid, epoch);
 
                     if (newPercentage < 0.01)
@@ -187,6 +189,8 @@ namespace SpaceExploration
                     percObj[speciesName] = picojson::value(percentageForDeployed);
 
                     epochStatistics["Percentages"] = picojson::value(percObj);
+                    epochStatistics["PlanetId"] = picojson::value((float)pid);
+                    epochStatistics["EpochNum"] = picojson::value((float)epoch);
                     GameDBUtils::UpdateEpochStatistics(mAlmanacServerCfg, epochStatistics, pid, epoch);
 
                     picojson::array individuals;
