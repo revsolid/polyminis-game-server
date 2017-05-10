@@ -225,8 +225,8 @@ namespace Inventory
         if (isNew)
         {  
             // Hardcoded a specific species
-            planetEpoch = "314151030";
-            std::vector<std::string> seedOptions = { "Just", "Sant", "Rumilus" };
+            planetEpoch = "90904050";
+            std::vector<std::string> seedOptions = { "Jose", "Okoth", "Caleva" };
 
             int index = speciesName.size() % seedOptions.size();
 
